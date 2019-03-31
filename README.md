@@ -3,6 +3,10 @@
 For simple integration into ASP.NET Core projects, the [__Kros.KORM.Extensions.Asp__](https://www.nuget.org/packages/Kros.KORM.Extensions.Asp/) package was created.
 [![Build status](https://ci.appveyor.com/api/projects/status/xebjpdbakd45mfs4/branch/master?svg=true)](https://ci.appveyor.com/project/Kros/kros-libs-u2wo6/branch/master)
 
+## Documentation
+
+For configuration, general information and examples [see the documentation](https://kros-sk.github.io/docs/Kros.KORM.Extensions.Asp/).
+
 ### Download
 
 Kros.KORM.Extensions.Asp is available from __Nuget__ [__Kros.KORM.Extensions.Asp__](https://www.nuget.org/packages/Kros.KORM.Extensions.Asp/).
