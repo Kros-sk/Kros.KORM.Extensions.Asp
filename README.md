@@ -71,7 +71,7 @@ The previous code requires the `KormMigration` section in the configurations:
 }
 ```
 
-Korm performs migrations that default searches in the main assembly in the `Sql_scripts` directory. The script file name must match pattern `{migrationId}_{MigrationName}.sql`.
+Korm performs migrations that default searches in the main assembly in the `SqlScripts` directory. The script file name must match pattern `{migrationId}_{MigrationName}.sql`.
 `MigrationId` is increasing number over time.
 
 For example: `20190301001_AddPeopleTable.sql`
