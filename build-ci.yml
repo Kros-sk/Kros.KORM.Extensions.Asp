@@ -32,5 +32,5 @@ steps:
     displayName: 'Tests'
     inputs:
       command: test
-      projects: '**/$(projectName).UnitTests.csproj'
+      projects: '**/*Tests*.csproj'
       arguments: '--configuration $(BuildConfiguration) --no-restore'
