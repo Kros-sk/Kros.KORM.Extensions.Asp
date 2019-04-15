@@ -33,4 +33,3 @@ steps:
     inputs:
       command: test
       projects: '**/*Tests*.csproj'
-      # arguments: '--configuration $(BuildConfiguration) --no-restore'

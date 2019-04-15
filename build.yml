@@ -38,7 +38,6 @@ steps:
     inputs:
       command: test
       projects: '**/*Tests*.csproj'
-      arguments: '--configuration $(BuildConfiguration) --no-restore'
 
   - task: CopyFiles@2
     displayName: 'Copy package files to staging directory'
