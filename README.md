@@ -1,4 +1,4 @@
-# Kros.KORM.Extensions.Asp [![Build Status](https://dev.azure.com/krossk/DevShared/_apis/build/status/Kros.KORM.Extensions.Asp/Kros.KORM.Extensions.Asp?branchName=features/build)](https://dev.azure.com/krossk/DevShared/_build/latest?definitionId=69&branchName=features/build)
+# Kros.KORM.Extensions.Asp [![Build Status](https://dev.azure.com/krossk/DevShared/_apis/build/status/Kros.KORM.Extensions.Asp/Kros.KORM.Extensions.Asp?branchName=features/build)](https://dev.azure.com/krossk/DevShared/_build/latest?definitionId=69&branchName=master)
 
 For simple integration into ASP.NET Core projects, the [__Kros.KORM.Extensions.Asp__](https://www.nuget.org/packages/Kros.KORM.Extensions.Asp/) package was created.
 
