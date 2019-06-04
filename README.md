@@ -41,7 +41,7 @@ The configuration file *(typically `appsettings.json`)* must contain a section `
 
 If you need to initialize the database for [IIdGenerator](https://kros-sk.github.io/Kros.Libs.Documentation/api/Kros.Utils/Kros.Data.IIdGenerator.html) then you can call `InitDatabaseForIdGenerator`.
 
-```  csharp
+``` csharp
 public void ConfigureServices(IServiceCollection services)
 {
     services.AddKorm(Configuration)
@@ -54,9 +54,9 @@ For simple database migration, you must call:
 ``` csharp
 public void ConfigureServices(IServiceCollection services)
 {
-  services.AddKorm(Configuration)
-	.AddKormMigrations(Configuration)
-	.Migrate();
+    services.AddKorm(Configuration)
+        .AddKormMigrations(Configuration)
+        .Migrate();
 }
 ```
 The previous code requires the `KormMigration` section in the configurations:
@@ -71,7 +71,7 @@ The previous code requires the `KormMigration` section in the configurations:
 }
 ```
 
-Migrations are disabled by default, so you have to enable them setting `AutoMigrate: true`.
+Migrations are disabled by default, so you have to enable them by setting `AutoMigrate: true`.
 
 Korm performs migrations that default searches in the main assembly in the `SqlScripts` directory. The script file name must match pattern `{migrationId}_{MigrationName}.sql`.
 `MigrationId` is increasing number over time.
@@ -81,10 +81,8 @@ For example: `20190301001_AddPeopleTable.sql`
 CREATE TABLE [dbo].People (
     [Id] [int] NOT NULL,
     [Name] [nvarchar](255)
-CONSTRAINT [PK_People] PRIMARY KEY CLUSTERED
-    (
-        [Id] ASC
-    ) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+CONSTRAINT [PK_People] PRIMARY KEY CLUSTERED ([Id] ASC)
+    WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
 ```
