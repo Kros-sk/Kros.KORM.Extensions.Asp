@@ -23,7 +23,7 @@ To contribute with new topics/information or make changes, see [contributing](ht
 
 You can use the `AddKorm` extension method to register `IDatabase` to the DI container.
 
-```
+``` csharp
 public void ConfigureServices(IServiceCollection services)
 {
     services.AddKorm(Configuration);
@@ -31,7 +31,8 @@ public void ConfigureServices(IServiceCollection services)
 ```
 
 The configuration file *(typically `appsettings.json`)* must contain a section `ConnectionString`.
-```
+
+``` json
   "ConnectionString": {
     "ProviderName": "System.Data.SqlClient",
     "ConnectionString": "Server=servername\\instancename;Initial Catalog=database;Persist Security Info=False;"
@@ -40,7 +41,7 @@ The configuration file *(typically `appsettings.json`)* must contain a section `
 
 If you need to initialize the database for [IIdGenerator](https://kros-sk.github.io/Kros.Libs.Documentation/api/Kros.Utils/Kros.Data.IIdGenerator.html) then you can call `InitDatabaseForIdGenerator`.
 
-```
+```  csharp
 public void ConfigureServices(IServiceCollection services)
 {
     services.AddKorm(Configuration)
@@ -50,7 +51,7 @@ public void ConfigureServices(IServiceCollection services)
 
 ### Database migrations
 For simple database migration, you must call:
-```C#
+``` csharp
 public void ConfigureServices(IServiceCollection services)
 {
   services.AddKorm(Configuration)
@@ -60,42 +61,38 @@ public void ConfigureServices(IServiceCollection services)
 ```
 The previous code requires the `KormMigration` section in the configurations:
 
-```json
+``` json
 "KormMigrations": {
   "ConnectionString": {
     "ProviderName": "System.Data.SqlClient",
     "ConnectionString": "Server=servername\\instancename;Initial Catalog=database;Persist Security Info=False;"
   },
-  "AutoMigrate": "True"
+  "AutoMigrate": "true"
 }
 ```
+
+Migrations are disabled by default, so you have to enable them setting `AutoMigrate: true`.
 
 Korm performs migrations that default searches in the main assembly in the `SqlScripts` directory. The script file name must match pattern `{migrationId}_{MigrationName}.sql`.
 `MigrationId` is increasing number over time.
 
 For example: `20190301001_AddPeopleTable.sql`
-```sql
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE TABLE [dbo].People(
-	[Id] [int] NOT NULL,
-	[Name] [nvarchar](255)
+``` sql
+CREATE TABLE [dbo].People (
+    [Id] [int] NOT NULL,
+    [Name] [nvarchar](255)
 CONSTRAINT [PK_People] PRIMARY KEY CLUSTERED
-(
-	[Id] ASC
-) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+    (
+        [Id] ASC
+    ) WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY]
 GO
 ```
 
-You can disable auto migrations when you start the service by setting `AutoUpgrade: False`.
-
-Migration can also be executed through an HTTP query. By calling the `../kormmigration` endpoint, the necessary migration will be executed.
+Migration can also be executed through an HTTP query. By calling the `/kormmigration` endpoint, the necessary migration will be executed.
 However, you need to add middleware:
 
-```CSharp
+``` csharp
 public void Configure(IApplicationBuilder app, IHostingEnvironment env)
 {
   app.UseKormMigrations(o =>
@@ -105,9 +102,9 @@ public void Configure(IApplicationBuilder app, IHostingEnvironment env)
 }
 ```
 
-If you have scripts stored in a different way (for example, somewhere on a disk or in another assembly, ...), you can configure your own providers to get these scripts.
+If you have scripts stored in a different way (for example, somewhere on a disk or in another assembly), you can configure your own providers to get these scripts.
 
-```CSharp
+``` csharp
 public void ConfigureServices(IServiceCollection services)
 {
   services.AddKorm(Configuration)
