@@ -32,11 +32,11 @@ public void ConfigureServices(IServiceCollection services)
 
 The configuration file *(typically `appsettings.json`)* must contain a section `ConnectionString`.
 
-``` json
-  "ConnectionString": {
-    "ProviderName": "System.Data.SqlClient",
-    "ConnectionString": "Server=servername\\instancename;Initial Catalog=database;Persist Security Info=False;"
-  }
+``` jsonc
+"ConnectionString": {
+  "ProviderName": "System.Data.SqlClient",
+  "ConnectionString": "Server=servername\\instancename;Initial Catalog=database;Persist Security Info=False;"
+}
 ```
 
 If you need to initialize the database for [IIdGenerator](https://kros-sk.github.io/Kros.Libs.Documentation/api/Kros.Utils/Kros.Data.IIdGenerator.html) then you can call `InitDatabaseForIdGenerator`.
@@ -61,7 +61,7 @@ public void ConfigureServices(IServiceCollection services)
 ```
 The previous code requires the `KormMigration` section in the configurations:
 
-``` json
+``` jsonc
 "KormMigrations": {
   "ConnectionString": {
     "ProviderName": "System.Data.SqlClient",
