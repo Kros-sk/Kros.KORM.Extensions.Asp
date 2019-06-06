@@ -82,13 +82,14 @@ namespace Kros.KORM.Extensions.Asp
 
             var connectionString = configurationSection.Get<ConnectionStringSettings>();
             CheckOptions(connectionString);
+            var builder = new KormBuilder(services, connectionString);
 
             services.AddScoped<IDatabase>((serviceProvider) =>
             {
-                return new Database(connectionString);
+                return builder.Build();
             });
 
-            return new KormBuilder(services, connectionString);
+            return builder;
         }
 
         private static void CheckOptions(ConnectionStringSettings connectionString)

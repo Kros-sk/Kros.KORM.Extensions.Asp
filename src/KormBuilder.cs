@@ -18,6 +18,7 @@ namespace Kros.KORM.Extensions.Asp
     public class KormBuilder
     {
         private ConnectionStringSettings _connectionString;
+        private IDatabaseBuilder _builder;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="KormBuilder"/> class.
@@ -28,12 +29,39 @@ namespace Kros.KORM.Extensions.Asp
         {
             Services = Check.NotNull(services, nameof(services));
             _connectionString = Check.NotNull(connectionString, nameof(connectionString));
+
+            _builder = Database.Builder;
+            _builder.UseConnection(connectionString);
         }
 
         /// <summary>
         /// Gets the service collection.
         /// </summary>
         public IServiceCollection Services { get; }
+
+        /// <summary>
+        /// Use database configuration.
+        /// </summary>
+        /// <typeparam name="TConfiguration">Configuration type.</typeparam>
+        /// <returns>KORM builder.</returns>
+        public KormBuilder UseDatabaseConfiguration<TConfiguration>() where TConfiguration : DatabaseConfigurationBase, new()
+        {
+            _builder.UseDatabaseConfiguration<TConfiguration>();
+
+            return this;
+        }
+
+        /// <summary>
+        /// Use database configuration.
+        /// </summary>
+        /// <param name="databaseConfiguration">Instance of database configuration.</param>
+        /// <returns>KORM builder.</returns>
+        public KormBuilder UseDatabaseConfiguration(DatabaseConfigurationBase databaseConfiguration)
+        {
+            _builder.UseDatabaseConfiguration(databaseConfiguration);
+
+            return this;
+        }
 
         /// <summary>
         /// Initializes database for using Id generator.
@@ -126,5 +154,7 @@ namespace Kros.KORM.Extensions.Asp
                     .Wait();
             }
         }
+
+        internal IDatabase Build() => _builder.Build();
     }
 }
