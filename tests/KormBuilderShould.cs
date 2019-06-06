@@ -1,6 +1,7 @@
 ﻿using FluentAssertions;
 using Kros.Data;
 using Kros.KORM.Extensions.Asp;
+using Kros.KORM.Metadata;
 using Kros.KORM.Migrations;
 using Kros.UnitTests;
 using Microsoft.Extensions.DependencyInjection;
@@ -94,6 +95,19 @@ namespace Kros.KORM.Extensions.Api.UnitTests
             kormBuilder.Migrate();
 
             migrationRunner.DidNotReceive().MigrateAsync();
+        }
+
+        [Fact]
+        public void UseDatabaseConfiguration()
+        {
+            var kormBuilder = CreateKormBuilder();
+            var configuration = Substitute.For<DatabaseConfigurationBase>();
+
+            kormBuilder.UseDatabaseConfiguration(configuration);
+            var database = kormBuilder.Build();
+
+            database.Should().NotBeNull();
+            configuration.Received().OnModelCreating(Arg.Any<ModelConfigurationBuilder>());
         }
 
         private void CheckTableAndProcedure()
