@@ -2,24 +2,23 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-    <Company>KROS a.s.</Company>
+    <Company>KROS a. s.</Company>
     <Version>1.1.0-alfa</Version>
-    <Authors>KROS a.s.</Authors>
-    <Title>Kros.KORM</Title>
-    <Description>This package contains extensios for project Kros.KORM for AspNet Core projects.</Description>
-    <Copyright>Copyright © KROS a.s.</Copyright>
+    <Authors>KROS a. s.</Authors>
+    <Title>Kros.KORM.Extensions.Asp</Title>
+    <Description>Extensions for Kros.KORM library for ASP.NET Core projects.</Description>
+    <Copyright>Copyright © KROS a. s.</Copyright>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <RootNamespace>Kros.KORM.Extensions.Asp</RootNamespace>    <Product>Kros.KORM.Extensions.Asp</Product>
+    <RootNamespace>Kros.KORM.Extensions.Asp</RootNamespace>
+    <Product>Kros.KORM.Extensions.Asp</Product>
     <AssemblyName>Kros.KORM.Extensions.Asp</AssemblyName>
-    <DocumentationFile>bin\Release\Kros.KORM.xml</DocumentationFile>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
   <PropertyGroup>
     <PackageId>Kros.KORM.Extensions.Asp</PackageId>
-    <PackageProjectUrl>https://github.com/Kros-sk/Kros.Libs/blob/master/Kros.KORM.Extensions.Asp/README.md</PackageProjectUrl>
-    <PackageTags>
-      Kros;KORM;Asp.Net Core;Kros.KORM
-    </PackageTags>
+    <PackageProjectUrl>https://github.com/Kros-sk/Kros.KORM.Extensions.Asp</PackageProjectUrl>
+    <PackageTags>Kros;KORM;ASP.NET Core;Kros.KORM</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageIconUrl>https://en.gravatar.com/userimage/137934964/524e95fbd8c2e8779e02819ab6902bef.png</PackageIconUrl>
     <RepositoryUrl>https://github.com/Kros-sk/Kros.KORM.Extensions.Asp</RepositoryUrl>
@@ -27,10 +26,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <OutputPath>bin\Debug\</OutputPath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
