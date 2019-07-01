@@ -80,7 +80,7 @@ namespace Kros.KORM.Extensions.Asp
                     string.Format(Resources.ConfigurationSectionIsMissing, configurationSection.Key));
             }
 
-            var connectionString = configurationSection.Get<ConnectionStringSettings>();
+            ConnectionStringSettings connectionString = configurationSection.Get<ConnectionStringSettings>();
             CheckOptions(connectionString);
             var builder = new KormBuilder(services, connectionString);
 

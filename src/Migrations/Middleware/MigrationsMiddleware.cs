@@ -12,7 +12,9 @@ namespace Kros.KORM.Migrations.Middleware
     {
         private const string WasMigrationExecutedKey = "WasMigrationExecuted";
 
+#pragma warning disable IDE0052 // Remove unread private members
         private readonly RequestDelegate _next;
+#pragma warning restore IDE0052 // Remove unread private members
         private readonly MigrationMiddlewareOptions _options;
         private readonly IMemoryCache _cache;
 
@@ -32,30 +34,29 @@ namespace Kros.KORM.Migrations.Middleware
             _cache = Check.NotNull(cache, nameof(cache));
         }
 
+#pragma warning disable IDE0060 // Remove unused parameter
         /// <summary>
         /// Invokes the specified context.
         /// </summary>
         /// <param name="context">The context.</param>
         /// <param name="migrationsRunner">Migrations runner.</param>
-        public async Task Invoke(
-            HttpContext context,
-            IMigrationsRunner migrationsRunner)
+        public async Task Invoke(HttpContext context, IMigrationsRunner migrationsRunner)
         {
             if (CanMigrate())
             {
                 SetupCache();
-
                 await migrationsRunner.MigrateAsync();
             }
         }
+#pragma warning restore IDE0060 // Remove unused parameter
 
         private bool CanMigrate()
-            => !_cache.TryGetValue<bool>(WasMigrationExecutedKey, out var migrated) || !migrated;
+            => !_cache.TryGetValue(WasMigrationExecutedKey, out bool migrated) || !migrated;
 
         private void SetupCache()
         {
-            var options = new MemoryCacheEntryOptions()
-                .SetSlidingExpiration(_options.SlidingExpirationBetweenMigrations);
+            var options = new MemoryCacheEntryOptions();
+            options.SetSlidingExpiration(_options.SlidingExpirationBetweenMigrations);
             _cache.Set(WasMigrationExecutedKey, true, options);
         }
     }

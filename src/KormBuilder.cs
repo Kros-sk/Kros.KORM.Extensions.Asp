@@ -17,8 +17,8 @@ namespace Kros.KORM.Extensions.Asp
     /// </summary>
     public class KormBuilder
     {
-        private ConnectionStringSettings _connectionString;
-        private IDatabaseBuilder _builder;
+        private readonly ConnectionStringSettings _connectionString;
+        private readonly IDatabaseBuilder _builder;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="KormBuilder"/> class.
@@ -69,9 +69,10 @@ namespace Kros.KORM.Extensions.Asp
         /// <returns>This instance.</returns>
         public KormBuilder InitDatabaseForIdGenerator()
         {
-            var factory = IdGeneratorFactories.GetFactory(_connectionString.ConnectionString, _connectionString.ProviderName);
+            IIdGeneratorFactory factory = IdGeneratorFactories.GetFactory(
+                _connectionString.ConnectionString, _connectionString.ProviderName);
 
-            using (var idGenerator = factory.GetGenerator(string.Empty))
+            using (IIdGenerator idGenerator = factory.GetGenerator(string.Empty))
             {
                 idGenerator.InitDatabaseForIdGenerator();
             }
@@ -96,7 +97,7 @@ namespace Kros.KORM.Extensions.Asp
         {
             IConfigurationSection migrationsConfig = GetMigrationsSection(configuration);
             _autoMigrate = migrationsConfig.GetValue(AutoMigrateSectionName, false);
-            var connectionString = migrationsConfig
+            ConnectionStringSettings connectionString = migrationsConfig
                 .GetSection(ConnectionStringSectionName).Get<ConnectionStringSettings>();
 
             Services
@@ -115,7 +116,7 @@ namespace Kros.KORM.Extensions.Asp
 
         private static MigrationOptions SetupMigrationOptions(Action<MigrationOptions> setupAction)
         {
-            MigrationOptions options = new MigrationOptions();
+            var options = new MigrationOptions();
 
             if (setupAction != null)
             {
@@ -131,7 +132,7 @@ namespace Kros.KORM.Extensions.Asp
 
         private static IConfigurationSection GetMigrationsSection(IConfiguration configuration)
         {
-            var migrationsConfig = configuration.GetSection(MigrationSectionName);
+            IConfigurationSection migrationsConfig = configuration.GetSection(MigrationSectionName);
             if (!migrationsConfig.Exists())
             {
                 throw new InvalidOperationException(
