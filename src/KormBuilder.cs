@@ -13,17 +13,35 @@ namespace Kros.KORM.Extensions.Asp
     /// </summary>
     public class KormBuilder
     {
+        /// <summary>
+        /// Default connection string name in configuration if no name is provided.
+        /// </summary>
         public const string DefaultConnectionStringName = "DefaultConnection";
+
         internal const string DefaultProviderName = Kros.Data.SqlServer.SqlServerDataHelper.ClientId;
         internal const bool DefaultAutoMigrate = false;
 
         private readonly IDatabaseBuilder _builder;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="KormBuilder"/> class. Automatic migrations are off and
+        /// Microsoft SQL Server KORM provider is used.
+        /// </summary>
+        /// <param name="services">The service collection.</param>
+        /// <param name="connectionString">The database connection string.</param>
         public KormBuilder(IServiceCollection services, string connectionString)
             : this(services, connectionString, DefaultAutoMigrate, DefaultProviderName)
         {
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="KormBuilder"/> class. Microsoft SQL Server KORM provider is used.
+        /// </summary>
+        /// <param name="services">The service collection.</param>
+        /// <param name="connectionString">The database connection string.</param>
+        /// <param name="autoMigrate">
+        /// Value for setting if automatic migrations (<see cref="Migrate()"/>) are allowed or not.
+        /// </param>
         public KormBuilder(IServiceCollection services, string connectionString, bool autoMigrate)
             : this(services, connectionString, autoMigrate, DefaultProviderName)
         {
@@ -33,7 +51,11 @@ namespace Kros.KORM.Extensions.Asp
         /// Initializes a new instance of the <see cref="KormBuilder"/> class.
         /// </summary>
         /// <param name="services">The service collection.</param>
-        /// <param name="connectionString">The connection string settings.</param>
+        /// <param name="connectionString">The database connection string.</param>
+        /// <param name="autoMigrate">
+        /// Value for setting if automatic migrations (<see cref="Migrate()"/>) are allowed or not.
+        /// </param>
+        /// <param name="kormProvider">KORM provider value.</param>
         public KormBuilder(IServiceCollection services, string connectionString, bool autoMigrate, string kormProvider)
         {
             Services = Check.NotNull(services, nameof(services));
@@ -93,7 +115,6 @@ namespace Kros.KORM.Extensions.Asp
         /// <summary>
         /// Adds configuration for <see cref="MigrationsMiddleware"/> into <see cref="IServiceCollection"/>.
         /// </summary>
-        /// <param name="configuration">The configuration.</param>
         /// <param name="setupAction">Setup migration options.</param>
         /// <returns>This instance of <see cref="KormBuilder"/>.</returns>
         public KormBuilder AddKormMigrations(Action<MigrationOptions> setupAction = null)
@@ -127,7 +148,7 @@ namespace Kros.KORM.Extensions.Asp
         }
 
         /// <summary>
-        /// Execute database migration.
+        /// Execute database migration. Migrations are executed only if they were enabled in constructor.
         /// </summary>
         public void Migrate()
         {

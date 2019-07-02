@@ -10,20 +10,38 @@ namespace Kros.KORM.Extensions.Asp
     /// <summary>
     /// Extensions for registering <see cref="IDatabase"/> into DI container.
     /// </summary>
-    /// <example>
-    /// "ConnectionString": {
-    ///   "ProviderName": "System.Data.SqlClient",
-    ///   "ConnectionString": "Server=servername\\instancename;Initial Catalog=database;Persist Security Info=False;"
-    /// }
-    /// </example>
     public static class ServiceCollectionExtensions
     {
+        /// <summary>
+        /// Key for connection string for setting KORM database provider. If the provider is not set in connection string,
+        /// Microsoft SQL Server provider is used.
+        /// </summary>
         public const string KormProviderKey = "KormProvider";
+
+        /// <summary>
+        /// Key for connection string for setting if automatic migrations are enabled (<see cref="KormBuilder.Migrate()"/>).
+        /// If the value is not set in connection string, automatic migrations are disabled.
+        /// </summary>
         public const string KormAutoMigrateKey = "KormAutoMigrate";
 
+        /// <summary>
+        /// Register KORM into DI container. The connection string with default name
+        /// (<see cref="KormBuilder.DefaultConnectionStringName"/>) from <paramref name="configuration"/> is used for database.
+        /// </summary>
+        /// <param name="services">The service collection.</param>
+        /// <param name="configuration">The configuration settings.</param>
+        /// <returns><see cref="KormBuilder"/> for <see cref="IDatabase"/> initialization.</returns>
         public static KormBuilder AddKorm(this IServiceCollection services, IConfiguration configuration)
-            => AddKorm(services, configuration.GetConnectionString(KormBuilder.DefaultConnectionStringName));
+            => AddKorm(services, configuration, KormBuilder.DefaultConnectionStringName);
 
+        /// <summary>
+        /// Register KORM into DI container. The connection string with name <paramref name="connectionStringName"/>
+        /// from <paramref name="configuration"/> is used for database.
+        /// </summary>
+        /// <param name="services">The service collection.</param>
+        /// <param name="configuration">The configuration settings.</param>
+        /// <param name="connectionStringName">Name of the connection string in configuration.</param>
+        /// <returns><see cref="KormBuilder"/> for <see cref="IDatabase"/> initialization.</returns>
         public static KormBuilder AddKorm(
             this IServiceCollection services,
             IConfiguration configuration,
@@ -39,6 +57,26 @@ namespace Kros.KORM.Extensions.Asp
             return AddKorm(services, connectionString);
         }
 
+        /// <summary>
+        /// Register KORM for database <paramref name="connectionString"/> into DI container.
+        /// </summary>
+        /// <param name="services">The service collection.</param>
+        /// <param name="connectionString">Connection string for database.</param>
+        /// <returns><see cref="KormBuilder"/> for <see cref="IDatabase"/> initialization.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="services"/> or <paramref name="connectionString"/> is <see langword="null"/>;
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <list type="bullet">
+        /// <item>
+        /// The value of <paramref name="connectionString"/> is empty string, or contains only whitespace characters.
+        /// </item>
+        /// <item>
+        /// The value of <paramref name="connectionString"/> is not empty, but contains only KORM keys. These keys are removed
+        /// so resulting connection string remains empty.
+        /// </item>
+        /// </list>
+        /// </exception>
         public static KormBuilder AddKorm(this IServiceCollection services, string connectionString)
         {
             Check.NotNull(services, nameof(services));

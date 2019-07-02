@@ -48,6 +48,19 @@ namespace Kros.KORM.Extensions.Api.UnitTests
         }
 
         [Fact]
+        public void ThrowArgumentExceptionIfDefaultConnectionStringNameDoesNotExist()
+        {
+            Action action = () =>
+            {
+                IConfigurationRoot configuration = new ConfigurationBuilder().Build();
+                var services = new ServiceCollection();
+
+                services.AddKorm(configuration);
+            };
+            action.Should().Throw<ArgumentException>().WithMessage($"*{KormBuilder.DefaultConnectionStringName}*");
+        }
+
+        [Fact]
         public void ThrowArgumentExceptionIfConnectionStringContainsOnlyKormValues()
         {
             Action action = () =>
