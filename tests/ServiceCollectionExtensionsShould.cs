@@ -1,5 +1,6 @@
-using FluentAssertions;
+﻿using FluentAssertions;
 using Kros.KORM.Extensions.Asp;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using Xunit;
@@ -11,9 +12,9 @@ namespace Kros.KORM.Extensions.Api.UnitTests
         [Fact]
         public void AddKormToContainer()
         {
-            var (configuration, services) = ConfigurationHelper.CreateHelpers("standard");
+            var services = new ServiceCollection();
 
-            services.AddKorm(configuration);
+            services.AddKorm("server=localhost");
 
             services.BuildServiceProvider()
                 .GetService<IDatabase>()
@@ -21,18 +22,47 @@ namespace Kros.KORM.Extensions.Api.UnitTests
         }
 
         [Fact]
-        public void ThrowExceptionWhenConfigurationSectionIsMissing()
+        public void UseDefaultConnectionStringIfConfigurationIsProvided()
         {
-            var (configuration, services) = ConfigurationHelper.CreateHelpers("missingsection");
+            IConfigurationRoot configuration = ConfigurationHelper.GetConfiguration();
+            var services = new ServiceCollection();
 
+            KormBuilder builder = services.AddKorm(configuration);
+
+            builder.ConnectionString.Should().Be(configuration.GetConnectionString("DefaultConnection"));
+        }
+
+        [Fact]
+        public void ThrowArgumentExceptionIfConnectionStringContainsOnlyKormValues()
+        {
             Action action = () =>
             {
-                services.AddKorm(configuration);
+                var services = new ServiceCollection();
+                services.AddKorm("KormProvider=LoremIpsum;KormAutoMigrate=false");
             };
 
-            action.Should()
-                .Throw<InvalidOperationException>()
-                .WithMessage("*Configuration section 'ConnectionString' is missing.*");
+            action.Should().Throw<ArgumentException>().And.ParamName.Should().Be("connectionString");
+        }
+
+        [Theory]
+        [InlineData("server=localhost;", KormBuilder.DefaultProviderName, false)]
+        [InlineData("server=localhost;KormProvider=", KormBuilder.DefaultProviderName, false)]
+        [InlineData("server=localhost;KormProvider=' \t '", KormBuilder.DefaultProviderName, false)]
+        [InlineData("server=localhost;KormProvider=LoremIpsum", "LoremIpsum", false)]
+        [InlineData("server=localhost;KormAutoMigrate=true", KormBuilder.DefaultProviderName, true)]
+        [InlineData("server=localhost;KormAutoMigrate=false", KormBuilder.DefaultProviderName, false)]
+        [InlineData("server=localhost;KormAutoMigrate=InvalidValue", KormBuilder.DefaultProviderName, false)]
+        [InlineData("server=localhost;KormAutoMigrate=", KormBuilder.DefaultProviderName, false)]
+        [InlineData("server=localhost;KormAutoMigrate=' \t '", KormBuilder.DefaultProviderName, false)]
+        public void ParseKormConnectionStringKeys(string connectionString, string provider, bool autoMigrate)
+        {
+            var services = new ServiceCollection();
+
+            KormBuilder builder = services.AddKorm(connectionString);
+
+            builder.KormProvider.Should().Be(provider);
+            builder.AutoMigrate.Should().Be(autoMigrate);
+            builder.ConnectionString.Should().Be("server=localhost");
         }
     }
 }
