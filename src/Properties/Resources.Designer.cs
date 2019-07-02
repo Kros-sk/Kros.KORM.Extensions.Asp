@@ -61,29 +61,20 @@ namespace Kros.KORM.Extensions.Asp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Configuration section &apos;{0}&apos; is missing..
+        ///   Looks up a localized string similar to Connection string contains only KORM keys. These are removed and so connection string is empty..
         /// </summary>
-        internal static string ConfigurationSectionIsMissing {
+        internal static string ConnectionStringContainsOnlyKormKeys {
             get {
-                return ResourceManager.GetString("ConfigurationSectionIsMissing", resourceCulture);
+                return ResourceManager.GetString("ConnectionStringContainsOnlyKormKeys", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &apos;ConnectionString&apos; is required..
+        ///   Looks up a localized string similar to Connection strings section does not contain a connection string with name &apos;{0}&apos;..
         /// </summary>
-        internal static string ConnectionStringIsRequired {
+        internal static string InvalidConnectionStringName {
             get {
-                return ResourceManager.GetString("ConnectionStringIsRequired", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &apos;ProviderName&apos; is required..
-        /// </summary>
-        internal static string ProviderNameIsRequired {
-            get {
-                return ResourceManager.GetString("ProviderNameIsRequired", resourceCulture);
+                return ResourceManager.GetString("InvalidConnectionStringName", resourceCulture);
             }
         }
     }

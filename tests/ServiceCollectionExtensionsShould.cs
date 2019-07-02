@@ -33,6 +33,21 @@ namespace Kros.KORM.Extensions.Api.UnitTests
         }
 
         [Fact]
+        public void ThrowArgumentExceptionIfInvalidConnectionStringName()
+        {
+            const string cnstrName = "NonExistingName";
+
+            Action action = () =>
+            {
+                IConfigurationRoot configuration = ConfigurationHelper.GetConfiguration();
+                var services = new ServiceCollection();
+
+                services.AddKorm(configuration, cnstrName);
+            };
+            action.Should().Throw<ArgumentException>().WithMessage($"*{cnstrName}*");
+        }
+
+        [Fact]
         public void ThrowArgumentExceptionIfConnectionStringContainsOnlyKormValues()
         {
             Action action = () =>

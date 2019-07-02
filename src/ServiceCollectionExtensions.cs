@@ -1,4 +1,5 @@
-﻿using Kros.Utils;
+using Kros.KORM.Extensions.Asp.Properties;
+using Kros.Utils;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -27,7 +28,16 @@ namespace Kros.KORM.Extensions.Asp
             this IServiceCollection services,
             IConfiguration configuration,
             string connectionStringName)
-            => AddKorm(services, configuration.GetConnectionString(connectionStringName));
+        {
+            Check.NotNullOrWhiteSpace(connectionStringName, nameof(connectionStringName));
+            string connectionString = configuration.GetConnectionString(connectionStringName);
+            if (connectionString is null)
+            {
+                throw new ArgumentException(
+                    string.Format(Resources.InvalidConnectionStringName, connectionStringName), nameof(connectionStringName));
+            }
+            return AddKorm(services, connectionString);
+        }
 
         public static KormBuilder AddKorm(this IServiceCollection services, string connectionString)
         {
@@ -44,8 +54,7 @@ namespace Kros.KORM.Extensions.Asp
 
             if (string.IsNullOrWhiteSpace(connectionString))
             {
-                // RES:
-                throw new ArgumentException("Connection string contained only KORM keys. These were removed and so connection is empty.", nameof(connectionString));
+                throw new ArgumentException(Resources.ConnectionStringContainsOnlyKormKeys, nameof(connectionString));
             }
 
             var builder = new KormBuilder(services, connectionString, autoMigrate, providerName);

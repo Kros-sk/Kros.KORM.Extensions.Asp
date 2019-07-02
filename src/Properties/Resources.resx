@@ -1,4 +1,4 @@
-
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -117,13 +117,11 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ConfigurationSectionIsMissing" xml:space="preserve">
-    <value>Configuration section '{0}' is missing.</value>
+  <data name="ConnectionStringContainsOnlyKormKeys" xml:space="preserve">
+    <value>Connection string contains only KORM keys. These are removed and so connection string is empty.</value>
   </data>
-  <data name="ConnectionStringIsRequired" xml:space="preserve">
-    <value>'ConnectionString' is required.</value>
-  </data>
-  <data name="ProviderNameIsRequired" xml:space="preserve">
-    <value>'ProviderName' is required.</value>
+  <data name="InvalidConnectionStringName" xml:space="preserve">
+    <value>Connection strings section does not contain a connection string with name '{0}'.</value>
+    <comment>0 - connection string name in appsettings</comment>
   </data>
 </root>
