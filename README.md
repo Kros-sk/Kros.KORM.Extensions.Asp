@@ -16,10 +16,11 @@ To contribute with new topics/information or make changes, see [contributing](ht
 
 ## This topic contains following sections
 
-* [ASP.NET Core extensions](#aspnet-core-extensions)
-* [Database migrations](#database-migrations)
+* [ASP.NET Core Extensions](#aspnet-core-extensions)
+* [Database Migrations](#database-migrations)
+* [Id Generators](#id-generators)
 
-### ASP.NET Core extensions
+### ASP.NET Core Extensions
 
 You can use the `AddKorm` extension method to register `IDatabase` to the DI container.
 
@@ -30,53 +31,52 @@ public void ConfigureServices(IServiceCollection services)
 }
 ```
 
-The configuration file *(typically `appsettings.json`)* must contain a section `ConnectionString`.
+The configuration file *(typically `appsettings.json`)* must contain a standard connection strings section (`ConnectionStrings`) and there must be connection string named `DefaultConnection`. Name of the connection string can be specified as second parameter.
 
-``` jsonc
-"ConnectionString": {
-  "ProviderName": "System.Data.SqlClient",
-  "ConnectionString": "Server=servername\\instancename;Initial Catalog=database;Persist Security Info=False;"
+``` json
+"ConnectionStrings": {
+  "DefaultConnection": "Server=ServerName\\InstanceName; Initial Catalog=database; Integrated Security=true",
+  "local": "Server=Server2\\Instance; Integrated Security=true; KormAutoMigrate=true; KormProvider=System.Data.SqlClient;"
 }
 ```
 
-If you need to initialize the database for [IIdGenerator](https://kros-sk.github.io/Kros.Libs.Documentation/api/Kros.Utils/Kros.Data.IIdGenerator.html) then you can call `InitDatabaseForIdGenerator`.
+Connection string can be passed directly to `AddKorm` method.
 
 ``` csharp
 public void ConfigureServices(IServiceCollection services)
 {
-    services.AddKorm(Configuration)
-        .InitDatabaseForIdGenerator();
+    service.AddKorm(Configuration.GetConnectionString("connectionStringName"));
+
+    // Or directly.
+
+    services.AddKorm("Server=ServerName\\InstanceName; Initial Catalog=database; Integrated Security=true");
 }
 ```
 
-### Database migrations
+`AddKorm` extension supports additional keys in connection string, which will be used by KORM and **will be removed from the connection string**. These keys are:
+
+* `KormAutoMigrate`: The value is boolean `true`/`false`. If not set (or the value is invalid), the default value is `false`. If it is `true`, it allows automatic [database migrations](#database-migrations).
+* `KormProvider`: This specifies database provider which will be used. If not set, the value `System.Data.SqlClient` will be used. KORM currently supports only Microsoft SQL Server, so there is no need to use this parameter.
+
+### Database Migrations
+
 For simple database migration, you must call:
+
 ``` csharp
 public void ConfigureServices(IServiceCollection services)
 {
     services.AddKorm(Configuration)
-        .AddKormMigrations(Configuration)
+        .AddKormMigrations()
         .Migrate();
 }
 ```
-The previous code requires the `KormMigration` section in the configurations:
 
-``` jsonc
-"KormMigrations": {
-  "ConnectionString": {
-    "ProviderName": "System.Data.SqlClient",
-    "ConnectionString": "Server=servername\\instancename;Initial Catalog=database;Persist Security Info=False;"
-  },
-  "AutoMigrate": "true"
-}
-```
+Migrations are disabled by default, so the previous code requires that the automatic migrations are enabled in connection string: `KormAutoMigrate=true`
 
-Migrations are disabled by default, so you have to enable them by setting `AutoMigrate: true`.
-
-Korm performs migrations that default searches in the main assembly in the `SqlScripts` directory. The script file name must match pattern `{migrationId}_{MigrationName}.sql`.
-`MigrationId` is increasing number over time.
+Korm by default performs migrations by searching the main assembly for files in `SqlScripts` directory. The script file name must match pattern `{migrationId}_{MigrationName}.sql`. `MigrationId` is increasing number over time.
 
 For example: `20190301001_AddPeopleTable.sql`
+
 ``` sql
 CREATE TABLE [dbo].People (
     [Id] [int] NOT NULL,
@@ -87,7 +87,7 @@ CONSTRAINT [PK_People] PRIMARY KEY CLUSTERED ([Id] ASC)
 GO
 ```
 
-Migration can also be executed through an HTTP query. By calling the `/kormmigration` endpoint, the necessary migration will be executed.
+Migration can also be executed through an HTTP request. By calling the `/kormmigration` endpoint, the necessary migrations will be executed.
 However, you need to add middleware:
 
 ``` csharp
@@ -106,7 +106,7 @@ If you have scripts stored in a different way (for example, somewhere on a disk 
 public void ConfigureServices(IServiceCollection services)
 {
   services.AddKorm(Configuration)
-    .AddKormMigrations(Configuration, o =>
+    .AddKormMigrations(o =>
     {
         var assembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(x => x.FullName.StartWith("Demo.DatabaseLayer"));
         o.AddAssemblyScriptsProvider(assembly, "Demo.DatabaseLayer.Resources");
@@ -118,3 +118,15 @@ public void ConfigureServices(IServiceCollection services)
 ```
 
 KORM creates a `__KormMigrationsHistory` table in which it has a history of individual migrations.
+
+### Id Generators
+
+If you need to initialize the database for [IIdGenerator](https://kros-sk.github.io/Kros.Libs.Documentation/api/Kros.Utils/Kros.Data.IIdGenerator.html) then you can call `InitDatabaseForIdGenerator`.
+
+``` csharp
+public void ConfigureServices(IServiceCollection services)
+{
+    services.AddKorm(Configuration)
+        .InitDatabaseForIdGenerator();
+}
+```

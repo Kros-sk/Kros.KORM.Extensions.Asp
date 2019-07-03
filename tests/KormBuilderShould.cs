@@ -11,13 +11,6 @@ namespace Kros.KORM.Extensions.Api.UnitTests
 {
     public class KormBuilderShould
     {
-        [Theory]
-        [InlineData(typeof(string))]
-        public void asdf(Type t)
-        {
-
-        }
-
         [Fact]
         public void ThrowArgumentExceptionWhenArgumentsAreInvalid()
         {
