@@ -1,4 +1,4 @@
-using Kros.KORM.Extensions.Asp.Properties;
+﻿using Kros.KORM.Extensions.Asp.Properties;
 using Kros.Utils;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -110,7 +110,7 @@ namespace Kros.KORM.Extensions.Asp
                 if (!string.IsNullOrWhiteSpace(providerName))
                 {
                     return providerName;
-                };
+                }
             }
             return KormBuilder.DefaultProviderName;
         }
