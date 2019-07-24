@@ -70,11 +70,29 @@ namespace Kros.KORM.Extensions.Asp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Database with name &quot;{0}&quot; was already added..
+        /// </summary>
+        internal static string DuplicateDatabaseName {
+            get {
+                return ResourceManager.GetString("DuplicateDatabaseName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Connection strings section does not contain a connection string with name &apos;{0}&apos;..
         /// </summary>
         internal static string InvalidConnectionStringName {
             get {
                 return ResourceManager.GetString("InvalidConnectionStringName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Database with name &quot;{0}&quot; does not exist. Use &quot;{1}&quot; extension method to add it..
+        /// </summary>
+        internal static string InvalidDatabaseName {
+            get {
+                return ResourceManager.GetString("InvalidDatabaseName", resourceCulture);
             }
         }
     }

@@ -22,7 +22,9 @@ To contribute with new topics/information or make changes, see [contributing](ht
 
 ### ASP.NET Core Extensions
 
-You can use the `AddKorm` extension method to register `IDatabase` to the DI container.
+You can use the `AddKorm` extension methods to register databases to the DI container. This registers `IDatabaseFactory` into DI container. This factory can be used to retrieve `IDatabase` instances by name. If no name is specified, default name `DefaultConnection` will be used. `IDatabase` instances has scoped lifetime.
+
+**The first** database registered by `AddKorm` method is also added to the DI container directly as `IDatabase` dependency. This is for simple use case, when only one database is used. So there is no need for using `IDatabaseFactory`.
 
 ``` csharp
 public void ConfigureServices(IServiceCollection services)
@@ -36,24 +38,24 @@ The configuration file *(typically `appsettings.json`)* must contain a standard 
 ``` json
 "ConnectionStrings": {
   "DefaultConnection": "Server=ServerName\\InstanceName; Initial Catalog=database; Integrated Security=true",
-  "local": "Server=Server2\\Instance; Integrated Security=true; KormAutoMigrate=true; KormProvider=System.Data.SqlClient;"
+  "localConnection": "Server=Server2\\Instance; Integrated Security=true; KormAutoMigrate=true; KormProvider=System.Data.SqlClient;"
 }
 ```
 
-Connection string can be passed directly to `AddKorm` method.
+Connection string can be passed directly to `AddKorm` method, together with its name. The name `DefaultConnection` will be used if no name is specified.
 
 ``` csharp
 public void ConfigureServices(IServiceCollection services)
 {
-    service.AddKorm(Configuration.GetConnectionString("connectionStringName"));
+    // Added from appsettings.json under "localConnection" name.
+    services.AddKorm(Configuration, "localConnection");
 
-    // Or directly.
-
-    services.AddKorm("Server=ServerName\\InstanceName; Initial Catalog=database; Integrated Security=true");
+    // Added directly with the name "db2".
+    services.AddKorm("Server=ServerName\\InstanceName; Initial Catalog=database; Integrated Security=true", "db2");
 }
 ```
 
-`AddKorm` extension supports additional keys in connection string, which will be used by KORM and **will be removed from the connection string**. These keys are:
+`AddKorm` extension methods supports additional keys in connection string, which will be used by KORM and **will be removed from the connection string**. These keys are:
 
 * `KormAutoMigrate`: The value is boolean `true`/`false`. If not set (or the value is invalid), the default value is `false`. If it is `true`, it allows automatic [database migrations](#database-migrations).
 * `KormProvider`: This specifies database provider which will be used. If not set, the value `System.Data.SqlClient` will be used. KORM currently supports only Microsoft SQL Server, so there is no need to use this parameter.

@@ -120,8 +120,17 @@
   <data name="ConnectionStringContainsOnlyKormKeys" xml:space="preserve">
     <value>Connection string contains only KORM keys. These are removed and so connection string is empty.</value>
   </data>
+  <data name="DuplicateDatabaseName" xml:space="preserve">
+    <value>Database with name "{0}" was already added.</value>
+    <comment>0 - name of the database/connection string</comment>
+  </data>
   <data name="InvalidConnectionStringName" xml:space="preserve">
     <value>Connection strings section does not contain a connection string with name '{0}'.</value>
     <comment>0 - connection string name in appsettings</comment>
+  </data>
+  <data name="InvalidDatabaseName" xml:space="preserve">
+    <value>Database with name "{0}" does not exist. Use "{1}" extension method to add it.</value>
+    <comment>0 - name of the database/connection string
+1 - name of the extension method to use</comment>
   </data>
 </root>
