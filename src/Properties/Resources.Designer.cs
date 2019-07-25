@@ -61,29 +61,38 @@ namespace Kros.KORM.Extensions.Asp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Configuration section &apos;{0}&apos; is missing..
+        ///   Looks up a localized string similar to Connection string contains only KORM keys. These are removed and so connection string is empty..
         /// </summary>
-        internal static string ConfigurationSectionIsMissing {
+        internal static string ConnectionStringContainsOnlyKormKeys {
             get {
-                return ResourceManager.GetString("ConfigurationSectionIsMissing", resourceCulture);
+                return ResourceManager.GetString("ConnectionStringContainsOnlyKormKeys", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &apos;ConnectionString&apos; is required..
+        ///   Looks up a localized string similar to Database with name &quot;{0}&quot; was already added..
         /// </summary>
-        internal static string ConnectionStringIsRequired {
+        internal static string DuplicateDatabaseName {
             get {
-                return ResourceManager.GetString("ConnectionStringIsRequired", resourceCulture);
+                return ResourceManager.GetString("DuplicateDatabaseName", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &apos;ProviderName&apos; is required..
+        ///   Looks up a localized string similar to Connection strings section does not contain a connection string with name &apos;{0}&apos;..
         /// </summary>
-        internal static string ProviderNameIsRequired {
+        internal static string InvalidConnectionStringName {
             get {
-                return ResourceManager.GetString("ProviderNameIsRequired", resourceCulture);
+                return ResourceManager.GetString("InvalidConnectionStringName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Database with name &quot;{0}&quot; does not exist. Use &quot;{1}&quot; extension method to add it..
+        /// </summary>
+        internal static string InvalidDatabaseName {
+            get {
+                return ResourceManager.GetString("InvalidDatabaseName", resourceCulture);
             }
         }
     }
