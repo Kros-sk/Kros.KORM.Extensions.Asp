@@ -25,7 +25,9 @@ namespace Kros.KORM.Extensions.Asp
         /// </summary>
         public const string KormAutoMigrateKey = "KormAutoMigrate";
 
-        private static ConcurrentDictionary<IServiceCollection, bool> _databaseFactoryAdded =
+        // Only one IDatabaseFactory for service collection must be registered.
+        // This dictionary holds flags for already used service collections.
+        private static readonly ConcurrentDictionary<IServiceCollection, bool> _databaseFactoryAdded =
             new ConcurrentDictionary<IServiceCollection, bool>();
 
         /// <summary>
