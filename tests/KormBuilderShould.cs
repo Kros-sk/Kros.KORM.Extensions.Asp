@@ -20,23 +20,17 @@ namespace Kros.KORM.Extensions.Api.UnitTests
             Action action = () => new KormBuilder(null, connectionString);
             action.Should().Throw<ArgumentNullException>().And.ParamName.Should().Be("services");
 
-            action = () => new KormBuilder(services, null);
+            action = () => new KormBuilder(services, (string)null);
             action.Should().Throw<ArgumentNullException>().And.ParamName.Should().Be("connectionString");
+
+            action = () => new KormBuilder(services, (KormConnectionSettings)null);
+            action.Should().Throw<ArgumentNullException>().And.ParamName.Should().Be("connectionSettings");
 
             action = () => new KormBuilder(services, string.Empty);
             action.Should().Throw<ArgumentException>().And.ParamName.Should().Be("connectionString");
 
             action = () => new KormBuilder(services, " \t ");
             action.Should().Throw<ArgumentException>().And.ParamName.Should().Be("connectionString");
-
-            action = () => new KormBuilder(services, connectionString, false, null);
-            action.Should().Throw<ArgumentNullException>().And.ParamName.Should().Be("kormProvider");
-
-            action = () => new KormBuilder(services, connectionString, false, string.Empty);
-            action.Should().Throw<ArgumentException>().And.ParamName.Should().Be("kormProvider");
-
-            action = () => new KormBuilder(services, connectionString, false, " \t ");
-            action.Should().Throw<ArgumentException>().And.ParamName.Should().Be("kormProvider");
         }
 
         [Fact]
@@ -80,6 +74,6 @@ namespace Kros.KORM.Extensions.Api.UnitTests
         }
 
         private KormBuilder CreateKormBuilder(bool autoMigrate)
-            => new KormBuilder(new ServiceCollection(), "server=localhost", autoMigrate);
+            => new KormBuilder(new ServiceCollection(), $"server=localhost;KormAutoMigrate={autoMigrate}");
     }
 }

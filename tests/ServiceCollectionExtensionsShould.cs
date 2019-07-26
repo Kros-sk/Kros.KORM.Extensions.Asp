@@ -11,6 +11,8 @@ namespace Kros.KORM.Extensions.Api.UnitTests
 {
     public class ServiceCollectionExtensionsShould
     {
+        private const string DefaultProviderName = Kros.Data.SqlServer.SqlServerDataHelper.ClientId;
+
         [Fact]
         public void AddKormToContainer()
         {
@@ -31,7 +33,7 @@ namespace Kros.KORM.Extensions.Api.UnitTests
 
             KormBuilder builder = services.AddKorm(configuration);
 
-            builder.ConnectionString.Should().Be(configuration.GetConnectionString("DefaultConnection"));
+            builder.ConnectionSettings.ConnectionString.Should().Be(configuration.GetConnectionString("DefaultConnection"));
         }
 
         [Fact]
@@ -75,24 +77,24 @@ namespace Kros.KORM.Extensions.Api.UnitTests
         }
 
         [Theory]
-        [InlineData("server=localhost;", KormBuilder.DefaultProviderName, false)]
-        [InlineData("server=localhost;KormProvider=", KormBuilder.DefaultProviderName, false)]
-        [InlineData("server=localhost;KormProvider=' \t '", KormBuilder.DefaultProviderName, false)]
+        [InlineData("server=localhost;", DefaultProviderName, false)]
+        [InlineData("server=localhost;KormProvider=", DefaultProviderName, false)]
+        [InlineData("server=localhost;KormProvider=' \t '", DefaultProviderName, false)]
         [InlineData("server=localhost;KormProvider=LoremIpsum", "LoremIpsum", false)]
-        [InlineData("server=localhost;KormAutoMigrate=true", KormBuilder.DefaultProviderName, true)]
-        [InlineData("server=localhost;KormAutoMigrate=false", KormBuilder.DefaultProviderName, false)]
-        [InlineData("server=localhost;KormAutoMigrate=InvalidValue", KormBuilder.DefaultProviderName, false)]
-        [InlineData("server=localhost;KormAutoMigrate=", KormBuilder.DefaultProviderName, false)]
-        [InlineData("server=localhost;KormAutoMigrate=' \t '", KormBuilder.DefaultProviderName, false)]
+        [InlineData("server=localhost;KormAutoMigrate=true", DefaultProviderName, true)]
+        [InlineData("server=localhost;KormAutoMigrate=false", DefaultProviderName, false)]
+        [InlineData("server=localhost;KormAutoMigrate=InvalidValue", DefaultProviderName, false)]
+        [InlineData("server=localhost;KormAutoMigrate=", DefaultProviderName, false)]
+        [InlineData("server=localhost;KormAutoMigrate=' \t '", DefaultProviderName, false)]
         public void ParseKormConnectionStringKeys(string connectionString, string provider, bool autoMigrate)
         {
             var services = new ServiceCollection();
 
             KormBuilder builder = services.AddKorm(connectionString);
 
-            builder.KormProvider.Should().Be(provider);
-            builder.AutoMigrate.Should().Be(autoMigrate);
-            builder.ConnectionString.Should().Be("server=localhost");
+            builder.ConnectionSettings.KormProvider.Should().Be(provider);
+            builder.ConnectionSettings.AutoMigrate.Should().Be(autoMigrate);
+            builder.ConnectionSettings.ConnectionString.Should().Be("server=localhost");
         }
 
         [Fact]
