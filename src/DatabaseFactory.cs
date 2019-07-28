@@ -1,4 +1,5 @@
 ﻿using Kros.KORM.Extensions.Asp.Properties;
+using Kros.KORM.Migrations;
 using Kros.Utils;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -23,7 +24,7 @@ namespace Kros.KORM.Extensions.Asp
         /// <param name="name">The name of the database builder.</param>
         /// <param name="builder">Database builder.</param>
         /// <returns><see langword="true"/>, if this was the first builder added, otherwise <see langword="false"/>.</returns>
-        internal static bool AddBuilder(IServiceCollection services, string name, KormBuilder builder)
+        internal static void AddBuilder(IServiceCollection services, string name, KormBuilder builder)
         {
             Dictionary<string, KormBuilder> builders = AddBuildersDictionary(services);
             if (builders.ContainsKey(name))
@@ -31,10 +32,6 @@ namespace Kros.KORM.Extensions.Asp
                 throw new ArgumentException(string.Format(Resources.DuplicateDatabaseName, name), nameof(name));
             }
             builders.Add(name, builder);
-
-            // We need to know if it was the first builder added.
-            // The first builder is added into the service container also as IDatabase dependency.
-            return builders.Count == 1;
         }
 
         private readonly ConcurrentDictionary<string, IDatabase> _databases = new ConcurrentDictionary<string, IDatabase>();
@@ -48,6 +45,18 @@ namespace Kros.KORM.Extensions.Asp
 
         IDatabase IDatabaseFactory.GetDatabase(string name)
         {
+            KormBuilder builder = GetBuilder(name);
+            return _databases.GetOrAdd(name, _ => builder.Build());
+        }
+
+        IMigrationsRunner IDatabaseFactory.GetMigrationsRunner(string name)
+        {
+            KormBuilder builder = GetBuilder(name);
+            return builder.MigrationsRunner;
+        }
+
+        private KormBuilder GetBuilder(string name)
+        {
             if (_disposed)
             {
                 throw new ObjectDisposedException(nameof(DatabaseFactory));
@@ -60,7 +69,7 @@ namespace Kros.KORM.Extensions.Asp
                     string.Format(Resources.InvalidDatabaseName, name, nameof(ServiceCollectionExtensions.AddKorm)),
                     nameof(name));
             }
-            return _databases.GetOrAdd(name, _ => builder.Build());
+            return builder;
         }
 
         public void Dispose()

@@ -124,6 +124,9 @@
     <value>Database with name "{0}" was already added.</value>
     <comment>0 - name of the database/connection string</comment>
   </data>
+  <data name="EmptyConnectionStringInSettings" xml:space="preserve">
+    <value>Connection string in connection settings is empty.</value>
+  </data>
   <data name="InvalidConnectionStringName" xml:space="preserve">
     <value>Connection strings section does not contain a connection string with name '{0}'.</value>
     <comment>0 - connection string name in appsettings</comment>

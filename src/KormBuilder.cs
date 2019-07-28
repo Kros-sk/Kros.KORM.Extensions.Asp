@@ -1,4 +1,5 @@
 ﻿using Kros.Data;
+using Kros.KORM.Extensions.Asp.Properties;
 using Kros.KORM.Migrations;
 using Kros.KORM.Migrations.Middleware;
 using Kros.KORM.Migrations.Providers;
@@ -18,32 +19,16 @@ namespace Kros.KORM.Extensions.Asp
         /// </summary>
         public const string DefaultConnectionStringName = "DefaultConnection";
 
-        internal const string DefaultProviderName = Kros.Data.SqlServer.SqlServerDataHelper.ClientId;
-        internal const bool DefaultAutoMigrate = false;
-
         private readonly IDatabaseBuilder _builder;
+        private IMigrationsRunner _migrationsRunner;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="KormBuilder"/> class. Automatic migrations are off and
-        /// Microsoft SQL Server KORM provider is used.
+        /// Initializes a new instance of the <see cref="KormBuilder"/> class.
         /// </summary>
         /// <param name="services">The service collection.</param>
         /// <param name="connectionString">The database connection string.</param>
         public KormBuilder(IServiceCollection services, string connectionString)
-            : this(services, connectionString, DefaultAutoMigrate, DefaultProviderName)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="KormBuilder"/> class. Microsoft SQL Server KORM provider is used.
-        /// </summary>
-        /// <param name="services">The service collection.</param>
-        /// <param name="connectionString">The database connection string.</param>
-        /// <param name="autoMigrate">
-        /// Value for setting if automatic migrations (<see cref="Migrate()"/>) are allowed or not.
-        /// </param>
-        public KormBuilder(IServiceCollection services, string connectionString, bool autoMigrate)
-            : this(services, connectionString, autoMigrate, DefaultProviderName)
+            : this(services, new KormConnectionSettings(connectionString))
         {
         }
 
@@ -51,20 +36,16 @@ namespace Kros.KORM.Extensions.Asp
         /// Initializes a new instance of the <see cref="KormBuilder"/> class.
         /// </summary>
         /// <param name="services">The service collection.</param>
-        /// <param name="connectionString">The database connection string.</param>
-        /// <param name="autoMigrate">
-        /// Value for setting if automatic migrations (<see cref="Migrate()"/>) are allowed or not.
-        /// </param>
-        /// <param name="kormProvider">KORM provider value.</param>
-        public KormBuilder(IServiceCollection services, string connectionString, bool autoMigrate, string kormProvider)
+        /// <param name="connectionSettings">The database connection settings.</param>
+        public KormBuilder(IServiceCollection services, KormConnectionSettings connectionSettings)
         {
             Services = Check.NotNull(services, nameof(services));
-            ConnectionString = Check.NotNullOrWhiteSpace(connectionString, nameof(connectionString));
-            KormProvider = Check.NotNullOrWhiteSpace(kormProvider, nameof(kormProvider));
-            AutoMigrate = autoMigrate;
+            ConnectionSettings = Check.NotNull(connectionSettings, nameof(connectionSettings));
+            Check.NotNullOrWhiteSpace(
+                connectionSettings.ConnectionString, nameof(connectionSettings), Resources.EmptyConnectionStringInSettings);
 
             _builder = Database.Builder;
-            _builder.UseConnection(connectionString, kormProvider);
+            _builder.UseConnection(connectionSettings);
         }
 
         /// <summary>
@@ -72,9 +53,13 @@ namespace Kros.KORM.Extensions.Asp
         /// </summary>
         public IServiceCollection Services { get; }
 
-        internal string ConnectionString { get; }
-        internal string KormProvider { get; }
-        internal bool AutoMigrate { get; }
+        /// <summary>
+        /// <see cref="MigrationsRunner"/> for this database, if it was set
+        /// using <see cref="AddKormMigrations(Action{MigrationOptions})"/> method.
+        /// </summary>
+        public IMigrationsRunner MigrationsRunner => _migrationsRunner;
+
+        internal KormConnectionSettings ConnectionSettings { get; }
 
         /// <summary>
         /// Use database configuration.
@@ -104,7 +89,8 @@ namespace Kros.KORM.Extensions.Asp
         /// <returns>This instance.</returns>
         public KormBuilder InitDatabaseForIdGenerator()
         {
-            IIdGeneratorFactory factory = IdGeneratorFactories.GetFactory(ConnectionString, KormProvider);
+            IIdGeneratorFactory factory = IdGeneratorFactories.GetFactory(
+                ConnectionSettings.ConnectionString, ConnectionSettings.KormProvider);
             using (IIdGenerator idGenerator = factory.GetGenerator(string.Empty))
             {
                 idGenerator.InitDatabaseForIdGenerator();
@@ -119,15 +105,9 @@ namespace Kros.KORM.Extensions.Asp
         /// <returns>This instance of <see cref="KormBuilder"/>.</returns>
         public KormBuilder AddKormMigrations(Action<MigrationOptions> setupAction = null)
         {
-            Services
-                .AddMemoryCache()
-                .AddTransient((Func<IServiceProvider, IMigrationsRunner>)(s =>
-                {
-                    var database = new Database(ConnectionString, KormProvider);
-                    MigrationOptions options = SetupMigrationOptions(setupAction);
-                    return new MigrationsRunner(database, options);
-                }));
-
+            Services.AddMemoryCache();
+            MigrationOptions options = SetupMigrationOptions(setupAction);
+            _migrationsRunner = new MigrationsRunner(ConnectionSettings.GetFullConnectionString(), options);
             return this;
         }
 
@@ -152,12 +132,9 @@ namespace Kros.KORM.Extensions.Asp
         /// </summary>
         public void Migrate()
         {
-            if (AutoMigrate)
+            if (ConnectionSettings.AutoMigrate && (MigrationsRunner != null))
             {
-                Services.BuildServiceProvider()
-                    .GetService<IMigrationsRunner>()
-                    .MigrateAsync()
-                    .Wait();
+                MigrationsRunner.MigrateAsync().Wait();
             }
         }
 

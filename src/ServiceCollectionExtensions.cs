@@ -2,9 +2,8 @@
 using Kros.Utils;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using System;
-using System.Collections.Concurrent;
-using System.Data.Common;
 
 namespace Kros.KORM.Extensions.Asp
 {
@@ -13,23 +12,6 @@ namespace Kros.KORM.Extensions.Asp
     /// </summary>
     public static class ServiceCollectionExtensions
     {
-        /// <summary>
-        /// Key for connection string for setting KORM database provider. If the provider is not set in connection string,
-        /// Microsoft SQL Server provider is used.
-        /// </summary>
-        public const string KormProviderKey = "KormProvider";
-
-        /// <summary>
-        /// Key for connection string for setting if automatic migrations are enabled (<see cref="KormBuilder.Migrate()"/>).
-        /// If the value is not set in connection string, automatic migrations are disabled.
-        /// </summary>
-        public const string KormAutoMigrateKey = "KormAutoMigrate";
-
-        // Only one IDatabaseFactory for service collection must be registered.
-        // This dictionary holds flags for already used service collections.
-        private static readonly ConcurrentDictionary<IServiceCollection, bool> _databaseFactoryAdded =
-            new ConcurrentDictionary<IServiceCollection, bool>();
-
         /// <summary>
         /// Register KORM into DI container. The connection string with default name
         /// (<see cref="KormBuilder.DefaultConnectionStringName"/>) from <paramref name="configuration"/> is used for database.
@@ -162,74 +144,29 @@ namespace Kros.KORM.Extensions.Asp
             Check.NotNullOrWhiteSpace(connectionString, nameof(connectionString));
             Check.NotNullOrWhiteSpace(name, nameof(name));
 
-            var cnstrBuilder = new DbConnectionStringBuilder
-            {
-                ConnectionString = connectionString
-            };
-            string providerName = GetKormProvider(cnstrBuilder);
-            bool autoMigrate = GetKormAutoMigrate(cnstrBuilder);
-            connectionString = cnstrBuilder.ConnectionString; // Previous methods remove keys, so we want clean connection string.
-
-            if (string.IsNullOrWhiteSpace(connectionString))
+            var connectionSettings = new KormConnectionSettings(connectionString);
+            if (string.IsNullOrWhiteSpace(connectionSettings.ConnectionString))
             {
                 throw new ArgumentException(Resources.ConnectionStringContainsOnlyKormKeys, nameof(connectionString));
             }
 
-            return AddKormBuilder(services, name, connectionString, autoMigrate, providerName);
+            return AddKormBuilder(services, name, connectionSettings);
         }
 
         private static KormBuilder AddKormBuilder(
             IServiceCollection services,
             string name,
-            string connectionString,
-            bool autoMigrate,
-            string providerName)
+            KormConnectionSettings connectionSettings)
         {
             AddDatabaseFactory(services);
-            var builder = new KormBuilder(services, connectionString, autoMigrate, providerName);
-            if (DatabaseFactory.AddBuilder(services, name, builder))
-            {
-                // First database is added also as IDatabase mainly for backward compatibility.
-                services.AddScoped<IDatabase>(
-                    serviceProvider => serviceProvider.GetRequiredService<IDatabaseFactory>().GetDatabase(name));
-            }
+            var builder = new KormBuilder(services, connectionSettings);
+            DatabaseFactory.AddBuilder(services, name, builder);
+            services.TryAdd(ServiceDescriptor.Scoped<IDatabase>(
+                serviceProvider => serviceProvider.GetRequiredService<IDatabaseFactory>().GetDatabase(name)));
             return builder;
         }
 
         private static void AddDatabaseFactory(IServiceCollection services)
-        {
-            _ = _databaseFactoryAdded.GetOrAdd(services, svcs =>
-            {
-                svcs.AddScoped<IDatabaseFactory>(provider => new DatabaseFactory(services));
-                return true;
-            });
-        }
-
-        private static string GetKormProvider(DbConnectionStringBuilder cnstrBuilder)
-        {
-            if (cnstrBuilder.TryGetValue(KormProviderKey, out object cnstrProviderName))
-            {
-                cnstrBuilder.Remove(KormProviderKey);
-                string providerName = (string)cnstrProviderName;
-                if (!string.IsNullOrWhiteSpace(providerName))
-                {
-                    return providerName;
-                }
-            }
-            return KormBuilder.DefaultProviderName;
-        }
-
-        private static bool GetKormAutoMigrate(DbConnectionStringBuilder cnstrBuilder)
-        {
-            if (cnstrBuilder.TryGetValue(KormAutoMigrateKey, out object cnstrAutoMigrate))
-            {
-                cnstrBuilder.Remove(KormAutoMigrateKey);
-                if (bool.TryParse((string)cnstrAutoMigrate, out bool autoMigrate))
-                {
-                    return autoMigrate;
-                }
-            }
-            return KormBuilder.DefaultAutoMigrate;
-        }
+            => services.TryAdd(ServiceDescriptor.Scoped<IDatabaseFactory>(provider => new DatabaseFactory(services)));
     }
 }

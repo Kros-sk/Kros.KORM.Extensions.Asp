@@ -8,9 +8,9 @@ namespace Kros.KORM.Migrations.Middleware
     public class MigrationMiddlewareOptions
     {
         /// <summary>
-        /// Migrations endpoint URL.
+        /// Migrations endpoint URL. Default value is <c>/kormmigration</c>.
         /// </summary>
-        public string EndpointUrl { get; set; } = "/kormmigrate";
+        public string EndpointUrl { get; set; } = "/kormmigration";
 
         /// <summary>
         /// Minimum time between two migrations.

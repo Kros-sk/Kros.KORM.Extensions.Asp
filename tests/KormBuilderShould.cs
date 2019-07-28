@@ -1,7 +1,6 @@
 ﻿using FluentAssertions;
 using Kros.KORM.Extensions.Asp;
 using Kros.KORM.Metadata;
-using Kros.KORM.Migrations;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using System;
@@ -20,50 +19,17 @@ namespace Kros.KORM.Extensions.Api.UnitTests
             Action action = () => new KormBuilder(null, connectionString);
             action.Should().Throw<ArgumentNullException>().And.ParamName.Should().Be("services");
 
-            action = () => new KormBuilder(services, null);
+            action = () => new KormBuilder(services, (string)null);
             action.Should().Throw<ArgumentNullException>().And.ParamName.Should().Be("connectionString");
+
+            action = () => new KormBuilder(services, (KormConnectionSettings)null);
+            action.Should().Throw<ArgumentNullException>().And.ParamName.Should().Be("connectionSettings");
 
             action = () => new KormBuilder(services, string.Empty);
             action.Should().Throw<ArgumentException>().And.ParamName.Should().Be("connectionString");
 
             action = () => new KormBuilder(services, " \t ");
             action.Should().Throw<ArgumentException>().And.ParamName.Should().Be("connectionString");
-
-            action = () => new KormBuilder(services, connectionString, false, null);
-            action.Should().Throw<ArgumentNullException>().And.ParamName.Should().Be("kormProvider");
-
-            action = () => new KormBuilder(services, connectionString, false, string.Empty);
-            action.Should().Throw<ArgumentException>().And.ParamName.Should().Be("kormProvider");
-
-            action = () => new KormBuilder(services, connectionString, false, " \t ");
-            action.Should().Throw<ArgumentException>().And.ParamName.Should().Be("kormProvider");
-        }
-
-        [Fact]
-        public void AddMigrationsToContainer()
-        {
-            KormBuilder kormBuilder = CreateKormBuilder(false);
-            kormBuilder.AddKormMigrations();
-
-            kormBuilder.Services.BuildServiceProvider()
-                .GetService<IMigrationsRunner>()
-                .Should().NotBeNull();
-        }
-
-        [Theory]
-        [InlineData(true, 1)]
-        [InlineData(false, 0)]
-        public void ExecuteMigrationsBasedOnAutoMigrateValue(bool autoMigrate, int migrateCallCount)
-        {
-            KormBuilder kormBuilder = CreateKormBuilder(autoMigrate);
-            kormBuilder.AddKormMigrations();
-
-            IMigrationsRunner migrationRunner = Substitute.For<IMigrationsRunner>();
-            kormBuilder.Services.AddSingleton(migrationRunner);
-
-            kormBuilder.Migrate();
-
-            migrationRunner.Received(migrateCallCount).MigrateAsync();
         }
 
         [Fact]
@@ -80,6 +46,6 @@ namespace Kros.KORM.Extensions.Api.UnitTests
         }
 
         private KormBuilder CreateKormBuilder(bool autoMigrate)
-            => new KormBuilder(new ServiceCollection(), "server=localhost", autoMigrate);
+            => new KormBuilder(new ServiceCollection(), $"server=localhost;KormAutoMigrate={autoMigrate}");
     }
 }

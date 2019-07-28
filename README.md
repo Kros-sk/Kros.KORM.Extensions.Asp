@@ -89,33 +89,43 @@ CONSTRAINT [PK_People] PRIMARY KEY CLUSTERED ([Id] ASC)
 GO
 ```
 
-Migration can also be executed through an HTTP request. By calling the `/kormmigration` endpoint, the necessary migrations will be executed.
-However, you need to add middleware:
+Migration can also be executed through an HTTP request. By calling the `/kormmigration` endpoint, the necessary migrations will be executed. However, you need to add middleware:
 
 ``` csharp
 public void Configure(IApplicationBuilder app, IHostingEnvironment env)
 {
-  app.UseKormMigrations(o =>
-  {
-    o.EndpointUrl = "/kormmigration";
-  });
+    app.UseKormMigrations();
 }
 ```
+
+You can change the endpoint URL by configuration:
+
+``` csharp
+public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+{
+    app.UseKormMigrations(options =>
+    {
+        options.EndpointUrl = "/loremipsum";
+    });
+}
+```
+
+If multiple KORM databases are registered, all of them have unique name. Migrations are performed per database and the name of the database is specified in URL as another path segment: `/kormmigration/dbname` If the name is not specified, default connection string will be used (`DefaultConnection`).
 
 If you have scripts stored in a different way (for example, somewhere on a disk or in another assembly), you can configure your own providers to get these scripts.
 
 ``` csharp
 public void ConfigureServices(IServiceCollection services)
 {
-  services.AddKorm(Configuration)
-    .AddKormMigrations(o =>
-    {
-        var assembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(x => x.FullName.StartWith("Demo.DatabaseLayer"));
-        o.AddAssemblyScriptsProvider(assembly, "Demo.DatabaseLayer.Resources");
-        o.AddFileScriptsProvider(@"C:\scripts\");
-        o.AddScriptsProvider(new MyCustomScriptsProvider());
-    })
-    .Migrate();
+    services.AddKorm(Configuration)
+        .AddKormMigrations(o =>
+        {
+            var assembly = AppDomain.CurrentDomain.GetAssemblies()    .FirstOrDefault(x => x.FullName.StartWith  ("Demo.DatabaseLayer")  );
+            o.AddAssemblyScriptsProvider(assembly,     "Demo.DatabaseLayer.Resources");
+            o.AddFileScriptsProvider(@"C:\scripts\");
+            o.AddScriptsProvider(new MyCustomScriptsProvider());
+        })
+        .Migrate();
 }
 ```
 

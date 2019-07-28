@@ -29,14 +29,11 @@ namespace Kros.KORM.Extensions.Api.UnitTests
         [Fact]
         public void InitDatabaseForIdGenerator()
         {
-            KormBuilder kormBuilder = CreateKormBuilder(false);
+            var kormBuilder = new KormBuilder(new ServiceCollection(), ServerHelper.Connection.ConnectionString);
             kormBuilder.InitDatabaseForIdGenerator();
 
             CheckTableAndProcedure();
         }
-
-        private KormBuilder CreateKormBuilder(bool autoMigrate)
-            => new KormBuilder(new ServiceCollection(), ServerHelper.Connection.ConnectionString, autoMigrate);
 
         private void CheckTableAndProcedure()
         {

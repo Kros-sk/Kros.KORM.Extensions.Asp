@@ -79,6 +79,15 @@ namespace Kros.KORM.Extensions.Asp.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Connection string in connection settings is empty..
+        /// </summary>
+        internal static string EmptyConnectionStringInSettings {
+            get {
+                return ResourceManager.GetString("EmptyConnectionStringInSettings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Connection strings section does not contain a connection string with name &apos;{0}&apos;..
         /// </summary>
         internal static string InvalidConnectionStringName {
