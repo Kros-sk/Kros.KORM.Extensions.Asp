@@ -1,4 +1,5 @@
 ﻿using Kros.KORM.Extensions.Asp.Properties;
+using Kros.KORM.Migrations;
 using Kros.Utils;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -44,6 +45,18 @@ namespace Kros.KORM.Extensions.Asp
 
         IDatabase IDatabaseFactory.GetDatabase(string name)
         {
+            KormBuilder builder = GetBuilder(name);
+            return _databases.GetOrAdd(name, _ => builder.Build());
+        }
+
+        IMigrationsRunner IDatabaseFactory.GetMigrationsRunner(string name)
+        {
+            KormBuilder builder = GetBuilder(name);
+            return builder.MigrationsRunner;
+        }
+
+        private KormBuilder GetBuilder(string name)
+        {
             if (_disposed)
             {
                 throw new ObjectDisposedException(nameof(DatabaseFactory));
@@ -56,7 +69,7 @@ namespace Kros.KORM.Extensions.Asp
                     string.Format(Resources.InvalidDatabaseName, name, nameof(ServiceCollectionExtensions.AddKorm)),
                     nameof(name));
             }
-            return _databases.GetOrAdd(name, _ => builder.Build());
+            return builder;
         }
 
         public void Dispose()

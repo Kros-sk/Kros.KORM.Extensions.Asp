@@ -1,7 +1,6 @@
 ﻿using FluentAssertions;
 using Kros.KORM.Extensions.Asp;
 using Kros.KORM.Metadata;
-using Kros.KORM.Migrations;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using System;
@@ -31,33 +30,6 @@ namespace Kros.KORM.Extensions.Api.UnitTests
 
             action = () => new KormBuilder(services, " \t ");
             action.Should().Throw<ArgumentException>().And.ParamName.Should().Be("connectionString");
-        }
-
-        [Fact]
-        public void AddMigrationsToContainer()
-        {
-            KormBuilder kormBuilder = CreateKormBuilder(false);
-            kormBuilder.AddKormMigrations();
-
-            kormBuilder.Services.BuildServiceProvider()
-                .GetService<IMigrationsRunner>()
-                .Should().NotBeNull();
-        }
-
-        [Theory]
-        [InlineData(true, 1)]
-        [InlineData(false, 0)]
-        public void ExecuteMigrationsBasedOnAutoMigrateValue(bool autoMigrate, int migrateCallCount)
-        {
-            KormBuilder kormBuilder = CreateKormBuilder(autoMigrate);
-            kormBuilder.AddKormMigrations();
-
-            IMigrationsRunner migrationRunner = Substitute.For<IMigrationsRunner>();
-            kormBuilder.Services.AddSingleton(migrationRunner);
-
-            kormBuilder.Migrate();
-
-            migrationRunner.Received(migrateCallCount).MigrateAsync();
         }
 
         [Fact]

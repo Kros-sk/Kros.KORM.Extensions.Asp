@@ -20,6 +20,7 @@ namespace Kros.KORM.Extensions.Asp
         public const string DefaultConnectionStringName = "DefaultConnection";
 
         private readonly IDatabaseBuilder _builder;
+        private IMigrationsRunner _migrationsRunner;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="KormBuilder"/> class.
@@ -51,6 +52,12 @@ namespace Kros.KORM.Extensions.Asp
         /// Gets the service collection.
         /// </summary>
         public IServiceCollection Services { get; }
+
+        /// <summary>
+        /// <see cref="MigrationsRunner"/> for this database, if it was set
+        /// using <see cref="AddKormMigrations(Action{MigrationOptions})"/> method.
+        /// </summary>
+        public IMigrationsRunner MigrationsRunner => _migrationsRunner;
 
         internal KormConnectionSettings ConnectionSettings { get; }
 
@@ -98,15 +105,9 @@ namespace Kros.KORM.Extensions.Asp
         /// <returns>This instance of <see cref="KormBuilder"/>.</returns>
         public KormBuilder AddKormMigrations(Action<MigrationOptions> setupAction = null)
         {
-            Services
-                .AddMemoryCache()
-                .AddTransient((Func<IServiceProvider, IMigrationsRunner>)(s =>
-                {
-                    var database = new Database(ConnectionSettings);
-                    MigrationOptions options = SetupMigrationOptions(setupAction);
-                    return new MigrationsRunner(database, options);
-                }));
-
+            Services.AddMemoryCache();
+            MigrationOptions options = SetupMigrationOptions(setupAction);
+            _migrationsRunner = new MigrationsRunner(ConnectionSettings.GetFullConnectionString(), options);
             return this;
         }
 
@@ -131,12 +132,9 @@ namespace Kros.KORM.Extensions.Asp
         /// </summary>
         public void Migrate()
         {
-            if (ConnectionSettings.AutoMigrate)
+            if (ConnectionSettings.AutoMigrate && (MigrationsRunner != null))
             {
-                Services.BuildServiceProvider()
-                    .GetService<IMigrationsRunner>()
-                    .MigrateAsync()
-                    .Wait();
+                MigrationsRunner.MigrateAsync().Wait();
             }
         }
 

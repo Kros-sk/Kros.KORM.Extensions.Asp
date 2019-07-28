@@ -1,4 +1,5 @@
-﻿using Kros.Utils;
+﻿using Kros.KORM.Extensions.Asp;
+using Kros.Utils;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using System.Threading.Tasks;
@@ -10,7 +11,7 @@ namespace Kros.KORM.Migrations.Middleware
     /// </summary>
     public class MigrationsMiddleware
     {
-        private const string WasMigrationExecutedKey = "WasMigrationExecuted";
+        private const string MigrationExecutedKey = "KormMigrationsExecuted";
 
 #pragma warning disable IDE0052 // Remove unread private members
         private readonly RequestDelegate _next;
@@ -24,40 +25,46 @@ namespace Kros.KORM.Migrations.Middleware
         /// <param name="next">The next delegate.</param>
         /// <param name="cache">Memory cache.</param>
         /// <param name="options">Migration options.</param>
-        public MigrationsMiddleware(
-            RequestDelegate next,
-            IMemoryCache cache,
-            MigrationMiddlewareOptions options)
+        public MigrationsMiddleware(RequestDelegate next, IMemoryCache cache, MigrationMiddlewareOptions options)
         {
             _next = next;
             _options = Check.NotNull(options, nameof(options));
             _cache = Check.NotNull(cache, nameof(cache));
         }
 
-#pragma warning disable IDE0060 // Remove unused parameter
         /// <summary>
         /// Invokes the specified context.
         /// </summary>
         /// <param name="context">The context.</param>
-        /// <param name="migrationsRunner">Migrations runner.</param>
-        public async Task Invoke(HttpContext context, IMigrationsRunner migrationsRunner)
+        /// <param name="databaseFactory">Database factory for getting <see cref="IMigrationsRunner"/>.</param>
+        public async Task Invoke(HttpContext context, IDatabaseFactory databaseFactory)
         {
-            if (CanMigrate())
+            string databaseName = null;
+            if (context.Request.Path.HasValue)
             {
-                SetupCache();
+                databaseName = context.Request.Path.Value.Trim('/');
+            }
+            if (string.IsNullOrEmpty(databaseName))
+            {
+                databaseName = KormBuilder.DefaultConnectionStringName;
+            }
+            IMigrationsRunner migrationsRunner = databaseFactory.GetMigrationsRunner(databaseName);
+            if ((migrationsRunner != null) && CanMigrate(databaseName))
+            {
+                SetupCache(databaseName);
                 await migrationsRunner.MigrateAsync();
             }
         }
-#pragma warning restore IDE0060 // Remove unused parameter
 
-        private bool CanMigrate()
-            => !_cache.TryGetValue(WasMigrationExecutedKey, out bool migrated) || !migrated;
+        private bool CanMigrate(string name) => !_cache.TryGetValue(GetCacheKey(name), out bool migrated) || !migrated;
 
-        private void SetupCache()
+        private void SetupCache(string name)
         {
             var options = new MemoryCacheEntryOptions();
             options.SetSlidingExpiration(_options.SlidingExpirationBetweenMigrations);
-            _cache.Set(WasMigrationExecutedKey, true, options);
+            _cache.Set(GetCacheKey(name), true, options);
         }
+
+        private string GetCacheKey(string name) => MigrationExecutedKey + "-" + name;
     }
 }
