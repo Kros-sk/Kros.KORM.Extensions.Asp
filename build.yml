@@ -19,10 +19,7 @@ variables:
     value: 'Kros.KORM.Extensions.Asp'
 
 steps:
-  - task: DeleteFiles@1
-    inputs:
-      SourceFolder: '$(build.artifactStagingDirectory)'
-      Contents: '*.nupkg'
+  - template: steps/delete-nupkgs.yml@templates
 
   - task: DotNetCoreCLI@2
     displayName: 'Nuget restore'
