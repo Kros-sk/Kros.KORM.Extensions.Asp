@@ -19,17 +19,17 @@ namespace Kros.KORM.Extensions.Api.UnitTests
             Action action = () => new KormBuilder(null, connectionString);
             action.Should().Throw<ArgumentNullException>().And.ParamName.Should().Be("services");
 
-            action = () => new KormBuilder(services, (string)null);
-            action.Should().Throw<ArgumentNullException>().And.ParamName.Should().Be("connectionString");
-
             action = () => new KormBuilder(services, (KormConnectionSettings)null);
             action.Should().Throw<ArgumentNullException>().And.ParamName.Should().Be("connectionSettings");
 
+            action = () => new KormBuilder(services, (string)null);
+            action.Should().Throw<ArgumentNullException>().And.ParamName.Should().Be("connectionSettings");
+
             action = () => new KormBuilder(services, string.Empty);
-            action.Should().Throw<ArgumentException>().And.ParamName.Should().Be("connectionString");
+            action.Should().Throw<ArgumentException>().And.ParamName.Should().Be("connectionSettings");
 
             action = () => new KormBuilder(services, " \t ");
-            action.Should().Throw<ArgumentException>().And.ParamName.Should().Be("connectionString");
+            action.Should().Throw<ArgumentException>().And.ParamName.Should().Be("connectionSettings");
         }
 
         [Fact]

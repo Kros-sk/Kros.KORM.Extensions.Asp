@@ -65,39 +65,6 @@ namespace Kros.KORM.Extensions.Api.UnitTests
         }
 
         [Fact]
-        public void ThrowArgumentExceptionIfConnectionStringContainsOnlyKormValues()
-        {
-            Action action = () =>
-            {
-                var services = new ServiceCollection();
-                services.AddKorm("KormProvider=LoremIpsum;KormAutoMigrate=false");
-            };
-
-            action.Should().Throw<ArgumentException>().And.ParamName.Should().Be("connectionString");
-        }
-
-        [Theory]
-        [InlineData("server=localhost;", DefaultProviderName, false)]
-        [InlineData("server=localhost;KormProvider=", DefaultProviderName, false)]
-        [InlineData("server=localhost;KormProvider=' \t '", DefaultProviderName, false)]
-        [InlineData("server=localhost;KormProvider=LoremIpsum", "LoremIpsum", false)]
-        [InlineData("server=localhost;KormAutoMigrate=true", DefaultProviderName, true)]
-        [InlineData("server=localhost;KormAutoMigrate=false", DefaultProviderName, false)]
-        [InlineData("server=localhost;KormAutoMigrate=InvalidValue", DefaultProviderName, false)]
-        [InlineData("server=localhost;KormAutoMigrate=", DefaultProviderName, false)]
-        [InlineData("server=localhost;KormAutoMigrate=' \t '", DefaultProviderName, false)]
-        public void ParseKormConnectionStringKeys(string connectionString, string provider, bool autoMigrate)
-        {
-            var services = new ServiceCollection();
-
-            KormBuilder builder = services.AddKorm(connectionString);
-
-            builder.ConnectionSettings.KormProvider.Should().Be(provider);
-            builder.ConnectionSettings.AutoMigrate.Should().Be(autoMigrate);
-            builder.ConnectionSettings.ConnectionString.Should().Be("server=localhost");
-        }
-
-        [Fact]
         public void AddFirstDatabaseAsIDatabaseToServiceCollection()
         {
             var services = new ServiceCollection();

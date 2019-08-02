@@ -33,12 +33,12 @@ public void ConfigureServices(IServiceCollection services)
 }
 ```
 
-The configuration file *(typically `appsettings.json`)* must contain a standard connection strings section (`ConnectionStrings`) and there must be connection string named `DefaultConnection`. Name of the connection string can be specified as second parameter.
+The configuration file *(typically `appsettings.json`)* must contain a standard connection strings section (`ConnectionStrings`). Name of the connection string can be specified as second parameter. If the name is not specified, default name `DefaultConnection` will be used.
 
 ``` json
 "ConnectionStrings": {
   "DefaultConnection": "Server=ServerName\\InstanceName; Initial Catalog=database; Integrated Security=true",
-  "localConnection": "Server=Server2\\Instance; Integrated Security=true; KormAutoMigrate=true; KormProvider=System.Data.SqlClient;"
+  "localConnection": "Server=Server2\\Instance; Integrated Security=true;"
 }
 ```
 
@@ -55,10 +55,23 @@ public void ConfigureServices(IServiceCollection services)
 }
 ```
 
-`AddKorm` extension methods supports additional keys in connection string, which will be used by KORM and **will be removed from the connection string**. These keys are:
+KORM supports additional settings for connections:
 
-* `KormAutoMigrate`: The value is boolean `true`/`false`. If not set (or the value is invalid), the default value is `false`. If it is `true`, it allows automatic [database migrations](#database-migrations).
+* `AutoMigrate`: The value is boolean `true`/`false`. If not set (or the value is invalid), the default value is `false`. If it is `true`, it allows automatic [database migrations](#database-migrations).
 * `KormProvider`: This specifies database provider which will be used. If not set, the value `System.Data.SqlClient` will be used. KORM currently supports only Microsoft SQL Server, so there is no need to use this parameter.
+
+These settings (if needed) can also be set in configuration file under the `KormSettings` section. Settings are identified by connection string name.
+
+``` json
+"KormSettings": {
+  "DefaultConnection": {
+    "AutoMigrate": true
+  },
+  "localConnection": {
+    "AutoMigrate": true
+  }
+}
+```
 
 ### Database Migrations
 

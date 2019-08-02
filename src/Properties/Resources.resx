@@ -117,9 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ConnectionStringContainsOnlyKormKeys" xml:space="preserve">
-    <value>Connection string contains only KORM keys. These are removed and so connection string is empty.</value>
-  </data>
   <data name="DuplicateDatabaseName" xml:space="preserve">
     <value>Database with name "{0}" was already added.</value>
     <comment>0 - name of the database/connection string</comment>

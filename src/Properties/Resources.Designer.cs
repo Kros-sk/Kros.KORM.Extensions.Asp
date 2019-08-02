@@ -61,15 +61,6 @@ namespace Kros.KORM.Extensions.Asp.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Connection string contains only KORM keys. These are removed and so connection string is empty..
-        /// </summary>
-        internal static string ConnectionStringContainsOnlyKormKeys {
-            get {
-                return ResourceManager.GetString("ConnectionStringContainsOnlyKormKeys", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Database with name &quot;{0}&quot; was already added..
         /// </summary>
         internal static string DuplicateDatabaseName {
