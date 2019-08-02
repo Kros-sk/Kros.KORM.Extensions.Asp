@@ -26,7 +26,7 @@ namespace Kros.KORM.Extensions.Asp
         /// (connection string names in <c>appsettings</c>).
         /// </para>
         /// <para>
-        /// <b>The first</b> database added by any <see cref="AddKorm(IServiceCollection, string, string)" autoupgrade="true"/>
+        /// <b>The first</b> database added by any <see cref="AddKorm(IServiceCollection, IConfiguration)" autoupgrade="true"/>
         /// method is registered in the DI container also as <see cref="IDatabase"/> scoped dependency. So this database can be
         /// used directly as <see cref="IDatabase"/>, without using <see cref="IDatabaseFactory"/>.
         /// </para>
@@ -35,12 +35,12 @@ namespace Kros.KORM.Extensions.Asp
             => AddKorm(services, configuration, KormBuilder.DefaultConnectionStringName);
 
         /// <summary>
-        /// Register KORM into DI container. The connection string with name <paramref name="connectionStringName"/>
+        /// Register KORM into DI container. The connection string with name <paramref name="name"/>
         /// from <paramref name="configuration"/> is used for database.
         /// </summary>
         /// <param name="services">The service collection.</param>
         /// <param name="configuration">The configuration settings.</param>
-        /// <param name="connectionStringName">Name of the connection string in configuration.</param>
+        /// <param name="name">Name of the connection string in configuration.</param>
         /// <returns><see cref="KormBuilder"/> for <see cref="IDatabase"/> initialization.</returns>
         /// <remarks>
         /// <para>
@@ -49,24 +49,20 @@ namespace Kros.KORM.Extensions.Asp
         /// (connection string names in <c>appsettings</c>).
         /// </para>
         /// <para>
-        /// <b>The first</b> database added by any <see cref="AddKorm(IServiceCollection, string, string)" autoupgrade="true"/>
+        /// <b>The first</b> database added by any <see cref="AddKorm(IServiceCollection, IConfiguration)" autoupgrade="true"/>
         /// method is registered in the DI container also as <see cref="IDatabase"/> scoped dependency. So this database can be
         /// used directly as <see cref="IDatabase"/>, without using <see cref="IDatabaseFactory"/>.
         /// </para>
         /// </remarks>
-        public static KormBuilder AddKorm(
-            this IServiceCollection services,
-            IConfiguration configuration,
-            string connectionStringName)
+        public static KormBuilder AddKorm(this IServiceCollection services, IConfiguration configuration, string name)
         {
-            Check.NotNullOrWhiteSpace(connectionStringName, nameof(connectionStringName));
-            string connectionString = configuration.GetConnectionString(connectionStringName);
-            if (connectionString is null)
+            Check.NotNullOrWhiteSpace(name, nameof(name));
+            KormConnectionSettings connectionSettings = configuration.GetKormConnectionString(name);
+            if (connectionSettings is null)
             {
-                throw new ArgumentException(
-                    string.Format(Resources.InvalidConnectionStringName, connectionStringName), nameof(connectionStringName));
+                throw new ArgumentException(string.Format(Resources.InvalidConnectionStringName, name), nameof(name));
             }
-            return AddKorm(services, connectionString, connectionStringName);
+            return AddKormBuilder(services, name, connectionSettings);
         }
 
         /// <summary>
@@ -96,7 +92,7 @@ namespace Kros.KORM.Extensions.Asp
         /// (connection string names in <c>appsettings</c>).
         /// </para>
         /// <para>
-        /// <b>The first</b> database added by any <see cref="AddKorm(IServiceCollection, string, string)" autoupgrade="true"/>
+        /// <b>The first</b> database added by any <see cref="AddKorm(IServiceCollection, IConfiguration)" autoupgrade="true"/>
         /// method is registered in the DI container also as <see cref="IDatabase"/> scoped dependency. So this database can be
         /// used directly as <see cref="IDatabase"/>, without using <see cref="IDatabaseFactory"/>.
         /// </para>
@@ -133,7 +129,7 @@ namespace Kros.KORM.Extensions.Asp
         /// (connection string names in <c>appsettings</c>).
         /// </para>
         /// <para>
-        /// <b>The first</b> database added by any <see cref="AddKorm(IServiceCollection, string, string)" autoupgrade="true"/>
+        /// <b>The first</b> database added by any <see cref="AddKorm(IServiceCollection, IConfiguration)" autoupgrade="true"/>
         /// method is registered in the DI container also as <see cref="IDatabase"/> scoped dependency. So this database can be
         /// used directly as <see cref="IDatabase"/>, without using <see cref="IDatabaseFactory"/>.
         /// </para>
@@ -143,13 +139,73 @@ namespace Kros.KORM.Extensions.Asp
             Check.NotNull(services, nameof(services));
             Check.NotNullOrWhiteSpace(connectionString, nameof(connectionString));
             Check.NotNullOrWhiteSpace(name, nameof(name));
+            return AddKormBuilder(services, name, new KormConnectionSettings() { ConnectionString = connectionString });
+        }
 
-            var connectionSettings = new KormConnectionSettings(connectionString);
-            if (string.IsNullOrWhiteSpace(connectionSettings.ConnectionString))
-            {
-                throw new ArgumentException(Resources.ConnectionStringContainsOnlyKormKeys, nameof(connectionString));
-            }
+        /// <summary>
+        /// Register KORM for database <paramref name="connectionSettings"/> into DI container.
+        /// </summary>
+        /// <param name="services">The service collection.</param>
+        /// <param name="connectionSettings">Connection settings for database.</param>
+        /// <returns><see cref="KormBuilder"/> for <see cref="IDatabase"/> initialization.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// The value of any argument is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// </exception>
+        /// <remarks>
+        /// <para>
+        /// Method adds an <see cref="IDatabaseFactory"/> as scoped dependency into DI container.
+        /// Database (<see cref="IDatabase"/>) can be retrieved using that factory. Databases are identified by names
+        /// (connection string names in <c>appsettings</c>).
+        /// </para>
+        /// <para>
+        /// <b>The first</b> database added by any <see cref="AddKorm(IServiceCollection, IConfiguration)" autoupgrade="true"/>
+        /// method is registered in the DI container also as <see cref="IDatabase"/> scoped dependency. So this database can be
+        /// used directly as <see cref="IDatabase"/>, without using <see cref="IDatabaseFactory"/>.
+        /// </para>
+        /// </remarks>
+        public static KormBuilder AddKorm(this IServiceCollection services, KormConnectionSettings connectionSettings)
+            => AddKorm(services, connectionSettings, KormBuilder.DefaultConnectionStringName);
 
+        /// <summary>
+        /// Register KORM for database <paramref name="connectionSettings"/> into DI container.
+        /// </summary>
+        /// <param name="services">The service collection.</param>
+        /// <param name="connectionSettings">Connection settings for database.</param>
+        /// <param name="name">Name of the database. When the database is added from <c>appsettings</c>,
+        /// this is the connection string name in the settings.</param>
+        /// <returns><see cref="KormBuilder"/> for <see cref="IDatabase"/> initialization.</returns>
+        /// <exception cref="ArgumentNullException">
+        /// The value of any argument is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <list type="bullet">
+        /// <item>
+        /// The value of <paramref name="name"/> is empty string, or contains only whitespace characters.
+        /// </item>
+        /// </list>
+        /// </exception>
+        /// <remarks>
+        /// <para>
+        /// Method adds an <see cref="IDatabaseFactory"/> as scoped dependency into DI container.
+        /// Database (<see cref="IDatabase"/>) can be retrieved using that factory. Databases are identified by names
+        /// (connection string names in <c>appsettings</c>).
+        /// </para>
+        /// <para>
+        /// <b>The first</b> database added by any <see cref="AddKorm(IServiceCollection, IConfiguration)" autoupgrade="true"/>
+        /// method is registered in the DI container also as <see cref="IDatabase"/> scoped dependency. So this database can be
+        /// used directly as <see cref="IDatabase"/>, without using <see cref="IDatabaseFactory"/>.
+        /// </para>
+        /// </remarks>
+        public static KormBuilder AddKorm(
+            this IServiceCollection services,
+            KormConnectionSettings connectionSettings,
+            string name)
+        {
+            Check.NotNull(services, nameof(services));
+            Check.NotNull(connectionSettings, nameof(connectionSettings));
+            Check.NotNullOrWhiteSpace(name, nameof(name));
             return AddKormBuilder(services, name, connectionSettings);
         }
 

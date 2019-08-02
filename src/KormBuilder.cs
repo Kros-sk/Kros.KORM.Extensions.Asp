@@ -19,6 +19,12 @@ namespace Kros.KORM.Extensions.Asp
         /// </summary>
         public const string DefaultConnectionStringName = "DefaultConnection";
 
+        /// <summary>
+        /// Name of the section in configuration file (ususally <c>appsettings.json</c>), where settings for connections
+        /// are configured.
+        /// </summary>
+        public const string KormSettingsSectionName = "KormSettings";
+
         private readonly IDatabaseBuilder _builder;
         private IMigrationsRunner _migrationsRunner;
 
@@ -28,7 +34,7 @@ namespace Kros.KORM.Extensions.Asp
         /// <param name="services">The service collection.</param>
         /// <param name="connectionString">The database connection string.</param>
         public KormBuilder(IServiceCollection services, string connectionString)
-            : this(services, new KormConnectionSettings(connectionString))
+            : this(services, new KormConnectionSettings() { ConnectionString = connectionString })
         {
         }
 
@@ -107,7 +113,7 @@ namespace Kros.KORM.Extensions.Asp
         {
             Services.AddMemoryCache();
             MigrationOptions options = SetupMigrationOptions(setupAction);
-            _migrationsRunner = new MigrationsRunner(ConnectionSettings.GetFullConnectionString(), options);
+            _migrationsRunner = new MigrationsRunner(ConnectionSettings.ConnectionString, options);
             return this;
         }
 
