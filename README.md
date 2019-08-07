@@ -133,7 +133,7 @@ public void ConfigureServices(IServiceCollection services)
     services.AddKorm(Configuration)
         .AddKormMigrations(o =>
         {
-            var assembly = AppDomain.CurrentDomain.GetAssemblies()    .FirstOrDefault(x => x.FullName.StartWith  ("Demo.DatabaseLayer")  );
+            var assembly = AppDomain.CurrentDomain.GetAssemblies()    .FirstOrDefault(x => x.FullName.StartsWith  ("Demo.DatabaseLayer")  );
             o.AddAssemblyScriptsProvider(assembly,     "Demo.DatabaseLayer.Resources");
             o.AddFileScriptsProvider(@"C:\scripts\");
             o.AddScriptsProvider(new MyCustomScriptsProvider());
