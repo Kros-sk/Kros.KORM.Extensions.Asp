@@ -86,7 +86,7 @@ public void ConfigureServices(IServiceCollection services)
 }
 ```
 
-Migrations are disabled by default, so the previous code requires that the automatic migrations are enabled in connection string: `KormAutoMigrate=true`
+Migrations are disabled by default, so the previous code requires that the automatic migrations are enabled in KormSettings for each connection string: `AutoMigrate=true`
 
 Korm by default performs migrations by searching the main assembly for files in `SqlScripts` directory. The script file name must match pattern `{migrationId}_{MigrationName}.sql`. `MigrationId` is increasing number over time.
 
