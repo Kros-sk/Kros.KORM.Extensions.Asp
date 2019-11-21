@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="DevExpress.Xpo" Version="18.2.7" />
     <PackageReference Include="FluentAssertions" Version="5.7.0" />
     <PackageReference Include="Kros.Utils" Version="1.9.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.2.0" />
