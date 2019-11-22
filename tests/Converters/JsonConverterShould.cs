@@ -6,7 +6,6 @@ using Xunit;
 
 namespace Kros.KORM.Extensions.Api.UnitTests.Converters
 {
-
     public class JsonConverterShould
     {
         [Fact]
@@ -86,5 +85,4 @@ namespace Kros.KORM.Extensions.Api.UnitTests.Converters
             public TestClass ObjectProperty { get; set; }
         }
     }
-
 }
