@@ -25,8 +25,7 @@ namespace Kros.KORM.Converter
         /// <exception cref="ArgumentNullException">The value of <paramref name="options"/> is null.</exception>
         public JsonConverter(JsonSerializerOptions options)
         {
-            Check.NotNull(options, nameof(options));
-            _options = options;
+            _options = Check.NotNull(options, nameof(options));
         }
 
         /// <summary>
