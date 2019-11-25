@@ -8,19 +8,25 @@ namespace Kros.KORM.Converter
     /// Converter for converting JSON value from DB to entity.
     /// </summary>
     /// <seealso cref="IConverter" />
-    public class JsonConverter : IConverter
+    public class JsonConverter<T> : IConverter
     {
-        private readonly Type _entityType;
+        private readonly JsonSerializerOptions _options;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="JsonConverter"/> class.
+        /// Initializes a new instance of the <see cref="JsonConverter{T}"/> class with default serialization options.
         /// </summary>
-        /// <param name="entityType">Type of the entity.</param>
-        /// <exception cref="ArgumentNullException">The value of <paramref name="entityType"/> is null.</exception>
-        public JsonConverter(Type entityType)
+        public JsonConverter() : this(new JsonSerializerOptions())
+        { }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="JsonConverter{T}"/> class.
+        /// </summary>
+        /// <param name="options">Serialization options.</param>
+        /// <exception cref="ArgumentNullException">The value of <paramref name="options"/> is null.</exception>
+        public JsonConverter(JsonSerializerOptions options)
         {
-            Check.NotNull(entityType, nameof(entityType));
-            _entityType = entityType;
+            Check.NotNull(options, nameof(options));
+            _options = options;
         }
 
         /// <summary>
@@ -29,7 +35,7 @@ namespace Kros.KORM.Converter
         /// <param name="value">JSON value.</param>
         /// <returns>Entity.</returns>
         public object Convert(object value)
-            => JsonSerializer.Deserialize((string)value, _entityType);
+            => JsonSerializer.Deserialize((string)value, typeof(T), _options);
 
         /// <summary>
         /// Converts entity to JSON value for DB.
@@ -37,6 +43,6 @@ namespace Kros.KORM.Converter
         /// <param name="value">Entity.</param>
         /// <returns>Converted JSON value for DB.</returns>
         public object ConvertBack(object value)
-            => JsonSerializer.Serialize(value, _entityType);
+            => JsonSerializer.Serialize(value, typeof(T), _options);
     }
 }

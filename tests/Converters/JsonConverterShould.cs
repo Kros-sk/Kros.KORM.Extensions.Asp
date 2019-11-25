@@ -1,6 +1,7 @@
 ﻿using FluentAssertions;
 using Kros.KORM.Converter;
 using System;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using Xunit;
 
@@ -9,9 +10,9 @@ namespace Kros.KORM.Extensions.Api.UnitTests.Converters
     public class JsonConverterShould
     {
         [Fact]
-        public void ThrowArgumentExceptionWhenEntityTypeIsNotSet()
+        public void ThrowArgumentExceptionWhenSerializationOptionsAreNull()
         {
-            Action action = () => new JsonConverter(null);
+            Action action = () => new JsonConverter<TestClass>(null);
 
             action.Should().Throw<ArgumentException>();
         }
@@ -19,24 +20,45 @@ namespace Kros.KORM.Extensions.Api.UnitTests.Converters
         [Fact]
         public void ConvertJsonToEntity()
         {
-            var converter = new JsonConverter(typeof(TestClass));
+            var converter = new JsonConverter<TestClass>();
 
             TestClass expected = GetSampleClass();
             var actual = converter.Convert(GetSampleJson());
 
             actual.Should().BeOfType(typeof(TestClass));
-            ((TestClass)actual).BoolProperty.Should().Equals(expected.BoolProperty);
-            ((TestClass)actual).StringProperty.Should().Equals(expected.StringProperty);
-            ((TestClass)actual).DoubleProperty.Should().Equals(expected.DoubleProperty);
-            ((TestClass)actual).ArrayProperty.Should().BeEquivalentTo(expected.ArrayProperty);
-            ((TestClass)actual).ObjectProperty.Should().NotBeNull();
-            ((TestClass)actual).ObjectProperty.StringProperty.Equals(expected.ObjectProperty.StringProperty);
+            ((TestClass)actual).Should().BeEquivalentTo(expected);
+        }
+
+        [Fact]
+        public void ThrowJsonExceptionWhenTryingToConvertImproperlyFormattedJsonToEntity()
+        {
+            var converter = new JsonConverter<TestClass>();
+
+            Action action = () => converter.Convert(GetSampleImproperlyFormattedJson());
+
+            action.Should().Throw<JsonException>();
+        }
+
+        [Fact]
+        public void ConvertImproperlyFormattedJsonToEntityWhenUsingCorrectOptions()
+        {
+            var converter = new JsonConverter<TestClass>(new JsonSerializerOptions()
+            {
+                AllowTrailingCommas = true,
+                PropertyNameCaseInsensitive = true
+            });
+
+            TestClass expected = GetSampleClass();
+            var actual = converter.Convert(GetSampleImproperlyFormattedJson());
+
+            actual.Should().BeOfType(typeof(TestClass));
+            ((TestClass)actual).Should().BeEquivalentTo(expected);
         }
 
         [Fact]
         public void ConvertEntityToJson()
         {
-            var converter = new JsonConverter(typeof(TestClass));
+            var converter = new JsonConverter<TestClass>();
 
             string expected = GetSampleJson();
             var actual = converter.ConvertBack(GetSampleClass());
@@ -70,6 +92,23 @@ namespace Kros.KORM.Extensions.Api.UnitTests.Converters
                     ""ArrayProperty"":null,
                     ""ObjectProperty"":null
                 }
+            }", @"\s+", "");
+
+        private string GetSampleImproperlyFormattedJson()
+            => Regex.Replace(
+            @"{
+                ""boolProperty"":true,
+                ""stringProperty"":""LoremIpsum"",
+                ""doubleProperty"":3.1415926535897931,
+                ""arrayProperty"":[4,8,15,16,23,42],
+                ""objectProperty"":
+                {
+                    ""boolProperty"":false,
+                    ""stringProperty"":""DolorSitAmet"",
+                    ""doubleProperty"":0,
+                    ""arrayProperty"":null,
+                    ""objectProperty"":null
+                },
             }", @"\s+", "");
 
         private class TestClass
