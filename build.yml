@@ -12,6 +12,7 @@ resources:
       name: DevShared/Templates
 
 variables:
+  - group: Nuget
   - name: buildConfiguration
     value: 'Release'
 
