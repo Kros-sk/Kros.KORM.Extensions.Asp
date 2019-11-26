@@ -19,6 +19,7 @@ To contribute with new topics/information or make changes, see [contributing](ht
 * [ASP.NET Core Extensions](#aspnet-core-extensions)
 * [Database Migrations](#database-migrations)
 * [Id Generators](#id-generators)
+* [Converters](#converters)
 
 ### ASP.NET Core Extensions
 
@@ -153,5 +154,20 @@ public void ConfigureServices(IServiceCollection services)
 {
     services.AddKorm(Configuration)
         .InitDatabaseForIdGenerator();
+}
+```
+
+### Converters
+
+KORM supports custom converters (via [IConverter](https://kros-sk.github.io/Kros.Libs.Documentation/api/Kros.KORM/Kros.KORM.Converter.IConverter.html) implementation) for converting values from DB to objects and vice versa. These converters are set for individual columns in `OnModelCreating` method of database configuration class (`DatabaseConfigurationBase`).
+
+If you need to convert text formatted as JSON from database to entity, you can use pre-defined converter - `JsonConverter`:
+
+``` csharp
+public override void OnModelCreating(ModelConfigurationBuilder modelBuilder)
+{
+    modelBuilder.Entity<MyEntity>()
+        .HasTableName(MyEntityTableName)
+        .Property(x => x.MySerializableProperty).UseConverter<JsonConverter>();
 }
 ```
