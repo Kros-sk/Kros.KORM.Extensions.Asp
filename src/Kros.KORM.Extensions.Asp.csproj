@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp3.0</TargetFramework>
     <Company>KROS a. s.</Company>
-    <Version>1.1.0-alpha.5</Version>
+    <Version>1.1.0-alpha.6</Version>
     <Authors>KROS a. s.</Authors>
     <Title>Kros.KORM.Extensions.Asp</Title>
     <Description>Extensions for Kros.KORM library for ASP.NET Core projects.</Description>
