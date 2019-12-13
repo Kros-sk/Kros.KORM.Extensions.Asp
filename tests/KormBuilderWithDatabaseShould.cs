@@ -2,9 +2,9 @@
 using Kros.Data;
 using Kros.KORM.Extensions.Asp;
 using Kros.UnitTests;
+using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System.Data.SqlClient;
 using Xunit;
 
 namespace Kros.KORM.Extensions.Api.UnitTests
