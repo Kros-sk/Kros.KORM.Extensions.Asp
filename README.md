@@ -143,6 +143,20 @@ public void ConfigureServices(IServiceCollection services)
 }
 ```
 
+It is possible to set your own timeout for running migration script. Defaul timeout is 30 seconds.
+
+``` csharp
+public void ConfigureServices(IServiceCollection services)
+{
+    services.AddKorm(Configuration)
+        .AddKormMigrations(o =>
+        {
+            o.Timeout = TimeSpan.FromMinutes(1);
+        })
+        .Migrate();
+}
+```
+
 KORM creates a `__KormMigrationsHistory` table in which it has a history of individual migrations.
 
 ### Id Generators
