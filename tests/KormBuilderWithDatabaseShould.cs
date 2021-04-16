@@ -27,10 +27,10 @@ namespace Kros.KORM.Extensions.Api.UnitTests
         }
 
         [Fact]
-        public void InitDatabaseForIdGenerator()
+        public void InitDatabaseForIdGenerators()
         {
             var kormBuilder = new KormBuilder(new ServiceCollection(), ServerHelper.Connection.ConnectionString);
-            kormBuilder.InitDatabaseForIdGenerator();
+            kormBuilder.InitDatabaseForIdGenerators();
 
             CheckTableAndProcedure();
         }
@@ -44,6 +44,12 @@ namespace Kros.KORM.Extensions.Api.UnitTests
                 ((int)cmd.ExecuteScalar()).Should().Be(1);
 
                 cmd.CommandText = "SELECT Count(*) FROM sys.procedures WHERE name = 'spGetNewId' AND type = 'P'";
+                ((int)cmd.ExecuteScalar()).Should().Be(1);
+
+                cmd.CommandText = "SELECT Count(*) FROM sys.tables WHERE name = 'IdStoreInt64' AND type = 'U'";
+                ((int)cmd.ExecuteScalar()).Should().Be(1);
+
+                cmd.CommandText = "SELECT Count(*) FROM sys.procedures WHERE name = 'spGetNewIdInt64' AND type = 'P'";
                 ((int)cmd.ExecuteScalar()).Should().Be(1);
             }
         }
