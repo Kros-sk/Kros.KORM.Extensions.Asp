@@ -93,11 +93,18 @@ namespace Kros.KORM.Extensions.Asp
         /// Initializes database for using Id generator.
         /// </summary>
         /// <returns>This instance.</returns>
-        public KormBuilder InitDatabaseForIdGenerator()
+        [Obsolete("Use InitDatabaseForIdGenerators() method.")]
+        public KormBuilder InitDatabaseForIdGenerator() => InitDatabaseForIdGenerators();
+
+        /// <summary>
+        /// Initializes database for using Id generator.
+        /// </summary>
+        /// <returns>This instance.</returns>
+        public KormBuilder InitDatabaseForIdGenerators()
         {
-            IIdGeneratorFactory factory = IdGeneratorFactories.GetFactory(
+            using IIdGeneratorsForDatabaseInit idGenerators = IdGeneratorFactories.GetGeneratorsForDatabaseInit(
                 ConnectionSettings.ConnectionString, ConnectionSettings.KormProvider);
-            using (IIdGenerator idGenerator = factory.GetGenerator(string.Empty))
+            foreach (IIdGenerator idGenerator in idGenerators)
             {
                 idGenerator.InitDatabaseForIdGenerator();
             }
