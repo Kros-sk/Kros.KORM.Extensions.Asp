@@ -44,7 +44,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Kros.KORM" Version="4.0.1" />
+    <PackageReference Include="Kros.KORM" Version="4.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
     <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="3.1.14" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="3.1.14" />
