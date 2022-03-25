@@ -64,7 +64,7 @@ namespace Kros.KORM.Extensions.Api.UnitTests.Converters
             var actual = converter.ConvertBack(GetSampleClass());
 
             actual.Should().BeOfType(typeof(string));
-            ((string)actual).Should().Equals(expected);
+            ((string)actual).Should().Be(expected);
         }
 
         private TestClass GetSampleClass()
@@ -72,7 +72,7 @@ namespace Kros.KORM.Extensions.Api.UnitTests.Converters
             {
                 BoolProperty = true,
                 StringProperty = "LoremIpsum",
-                DoubleProperty = Math.PI,
+                DoubleProperty = 3.14,
                 ArrayProperty = new int[] { 4, 8, 15, 16, 23, 42 },
                 ObjectProperty = new TestClass() { StringProperty = "DolorSitAmet" }
             };
@@ -82,7 +82,7 @@ namespace Kros.KORM.Extensions.Api.UnitTests.Converters
             @"{
                 ""BoolProperty"":true,
                 ""StringProperty"":""LoremIpsum"",
-                ""DoubleProperty"":3.1415926535897931,
+                ""DoubleProperty"":3.14,
                 ""ArrayProperty"":[4,8,15,16,23,42],
                 ""ObjectProperty"":
                 {
@@ -99,7 +99,7 @@ namespace Kros.KORM.Extensions.Api.UnitTests.Converters
             @"{
                 ""boolProperty"":true,
                 ""stringProperty"":""LoremIpsum"",
-                ""doubleProperty"":3.1415926535897931,
+                ""doubleProperty"":3.14,
                 ""arrayProperty"":[4,8,15,16,23,42],
                 ""objectProperty"":
                 {
