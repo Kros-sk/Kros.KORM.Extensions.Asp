@@ -35,7 +35,7 @@ namespace Microsoft.Extensions.Configuration
             return null;
         }
 
-        static string SetApplicationName(string connectionString, string applicationName)
+        private static string SetApplicationName(string connectionString, string applicationName)
         {
             try
             {
