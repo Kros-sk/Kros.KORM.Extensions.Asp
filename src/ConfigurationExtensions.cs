@@ -1,5 +1,6 @@
 ﻿using Kros.KORM;
 using Kros.KORM.Extensions.Asp;
+using Microsoft.Data.SqlClient;
 
 namespace Microsoft.Extensions.Configuration
 {
@@ -24,7 +25,7 @@ namespace Microsoft.Extensions.Configuration
             if (section.Exists())
             {
                 KormConnectionSettings settings = section.Get<KormConnectionSettings>();
-                settings.ConnectionString = connectionString;
+                settings.ConnectionString = SetApplicationName(connectionString, settings.ApplicationName);
                 return settings;
             }
             else if (connectionString != null)
@@ -32,6 +33,25 @@ namespace Microsoft.Extensions.Configuration
                 return new KormConnectionSettings() { ConnectionString = connectionString };
             }
             return null;
+        }
+
+        static string SetApplicationName(string connectionString, string applicationName)
+        {
+            try
+            {
+                var builder = new SqlConnectionStringBuilder(connectionString);
+
+                if (string.IsNullOrEmpty(builder.ApplicationName) && !string.IsNullOrEmpty(applicationName))
+                {
+                    builder.ApplicationName = applicationName;
+                }
+
+                return builder.ConnectionString;
+            }
+            catch
+            {
+                return connectionString;
+            }
         }
     }
 }
