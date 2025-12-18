@@ -25,7 +25,7 @@ namespace Kros.KORM.Extensions.Api.UnitTests.Converters
             TestClass expected = GetSampleClass();
             var actual = converter.Convert(GetSampleJson());
 
-            actual.Should().BeOfType(typeof(TestClass));
+            actual.Should().BeOfType<TestClass>();
             ((TestClass)actual).Should().BeEquivalentTo(expected);
         }
 
@@ -51,7 +51,7 @@ namespace Kros.KORM.Extensions.Api.UnitTests.Converters
             TestClass expected = GetSampleClass();
             var actual = converter.Convert(GetSampleImproperlyFormattedJson());
 
-            actual.Should().BeOfType(typeof(TestClass));
+            actual.Should().BeOfType<TestClass>();
             ((TestClass)actual).Should().BeEquivalentTo(expected);
         }
 
@@ -63,7 +63,7 @@ namespace Kros.KORM.Extensions.Api.UnitTests.Converters
             string expected = GetSampleJson();
             var actual = converter.ConvertBack(GetSampleClass());
 
-            actual.Should().BeOfType(typeof(string));
+            actual.Should().BeOfType<string>();
             ((string)actual).Should().Be(expected);
         }
 
