@@ -1,5 +1,4 @@
-﻿using FluentAssertions;
-using Kros.KORM.Extensions.Asp;
+﻿using Kros.KORM.Extensions.Asp;
 using Kros.KORM.Metadata;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
@@ -16,20 +15,20 @@ namespace Kros.KORM.Extensions.Api.UnitTests
             const string connectionString = "server=localhost";
             var services = new ServiceCollection();
 
-            Action action = () => new KormBuilder(null, connectionString);
-            action.Should().Throw<ArgumentNullException>().And.ParamName.Should().Be("services");
+            var exception = Assert.Throws<ArgumentNullException>(() => new KormBuilder(null, connectionString));
+            Assert.Equal("services", exception.ParamName);
 
-            action = () => new KormBuilder(services, (KormConnectionSettings)null);
-            action.Should().Throw<ArgumentNullException>().And.ParamName.Should().Be("connectionSettings");
+            exception = Assert.Throws<ArgumentNullException>(() => new KormBuilder(services, (KormConnectionSettings)null));
+            Assert.Equal("connectionSettings", exception.ParamName);
 
-            action = () => new KormBuilder(services, (string)null);
-            action.Should().Throw<ArgumentNullException>().And.ParamName.Should().Be("connectionSettings");
+            exception = Assert.Throws<ArgumentNullException>(() => new KormBuilder(services, (string)null));
+            Assert.Equal("connectionSettings", exception.ParamName);
 
-            action = () => new KormBuilder(services, string.Empty);
-            action.Should().Throw<ArgumentException>().And.ParamName.Should().Be("connectionSettings");
+            var argumentException = Assert.Throws<ArgumentException>(() => new KormBuilder(services, string.Empty));
+            Assert.Equal("connectionSettings", argumentException.ParamName);
 
-            action = () => new KormBuilder(services, " \t ");
-            action.Should().Throw<ArgumentException>().And.ParamName.Should().Be("connectionSettings");
+            argumentException = Assert.Throws<ArgumentException>(() => new KormBuilder(services, " \t "));
+            Assert.Equal("connectionSettings", argumentException.ParamName);
         }
 
         [Fact]
@@ -41,11 +40,11 @@ namespace Kros.KORM.Extensions.Api.UnitTests
             kormBuilder.UseDatabaseConfiguration(configuration);
             IDatabase database = kormBuilder.Build();
 
-            database.Should().NotBeNull();
+            Assert.NotNull(database);
             configuration.Received().OnModelCreating(Arg.Any<ModelConfigurationBuilder>());
         }
 
-        private KormBuilder CreateKormBuilder(bool autoMigrate)
+        private static KormBuilder CreateKormBuilder(bool autoMigrate)
             => new KormBuilder(new ServiceCollection(), $"server=localhost;KormAutoMigrate={autoMigrate}");
     }
 }

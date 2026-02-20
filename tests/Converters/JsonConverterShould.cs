@@ -1,5 +1,4 @@
-﻿using FluentAssertions;
-using Kros.KORM.Converter;
+﻿using Kros.KORM.Converter;
 using System;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -12,9 +11,7 @@ namespace Kros.KORM.Extensions.Api.UnitTests.Converters
         [Fact]
         public void ThrowArgumentExceptionWhenSerializationOptionsAreNull()
         {
-            Action action = () => new JsonConverter<TestClass>(null);
-
-            action.Should().Throw<ArgumentException>();
+            Assert.Throws<ArgumentNullException>(() => new JsonConverter<TestClass>(null));
         }
 
         [Fact]
@@ -25,8 +22,8 @@ namespace Kros.KORM.Extensions.Api.UnitTests.Converters
             TestClass expected = GetSampleClass();
             var actual = converter.Convert(GetSampleJson());
 
-            actual.Should().BeOfType<TestClass>();
-            ((TestClass)actual).Should().BeEquivalentTo(expected);
+            var typedActual = Assert.IsType<TestClass>(actual);
+            Assert.Equivalent(expected, typedActual, strict: true);
         }
 
         [Fact]
@@ -36,7 +33,7 @@ namespace Kros.KORM.Extensions.Api.UnitTests.Converters
 
             Action action = () => converter.Convert(GetSampleImproperlyFormattedJson());
 
-            action.Should().Throw<JsonException>();
+            Assert.Throws<JsonException>(action);
         }
 
         [Fact]
@@ -51,8 +48,8 @@ namespace Kros.KORM.Extensions.Api.UnitTests.Converters
             TestClass expected = GetSampleClass();
             var actual = converter.Convert(GetSampleImproperlyFormattedJson());
 
-            actual.Should().BeOfType<TestClass>();
-            ((TestClass)actual).Should().BeEquivalentTo(expected);
+            var typedActual = Assert.IsType<TestClass>(actual);
+            Assert.Equivalent(expected, typedActual, strict: true);
         }
 
         [Fact]
@@ -63,11 +60,11 @@ namespace Kros.KORM.Extensions.Api.UnitTests.Converters
             string expected = GetSampleJson();
             var actual = converter.ConvertBack(GetSampleClass());
 
-            actual.Should().BeOfType<string>();
-            ((string)actual).Should().Be(expected);
+            var typedActual = Assert.IsType<string>(actual);
+            Assert.Equal(expected, typedActual);
         }
 
-        private TestClass GetSampleClass()
+        private static TestClass GetSampleClass()
             => new TestClass()
             {
                 BoolProperty = true,
@@ -77,7 +74,7 @@ namespace Kros.KORM.Extensions.Api.UnitTests.Converters
                 ObjectProperty = new TestClass() { StringProperty = "DolorSitAmet" }
             };
 
-        private string GetSampleJson()
+        private static string GetSampleJson()
             => Regex.Replace(
             @"{
                 ""BoolProperty"":true,
@@ -94,7 +91,7 @@ namespace Kros.KORM.Extensions.Api.UnitTests.Converters
                 }
             }", @"\s+", "");
 
-        private string GetSampleImproperlyFormattedJson()
+        private static string GetSampleImproperlyFormattedJson()
             => Regex.Replace(
             @"{
                 ""boolProperty"":true,
