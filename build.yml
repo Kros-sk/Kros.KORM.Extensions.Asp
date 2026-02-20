@@ -1,42 +1,47 @@
 trigger:
-  tags:
+  batch: true
+  branches:
     include:
-    - v*
+      - master
 
 pool: Default
 
-resources:
-  repositories:
-    - repository: templates
-      type: git
-      name: DevShared/Templates
-
 variables:
   - group: Nuget
-  - name: buildConfiguration
-    value: 'Release'
 
 steps:
-  - template: steps/delete-nupkgs.yml@templates
+  - pwsh: |
+      dotnet build "$(Build.SourcesDirectory)/Kros.KORM.Extensions.Asp.sln" --configuration Release
+    displayName: Build
 
-  - task: DotNetCoreCLI@2
-    displayName: 'Build'
+  - pwsh: |
+      dotnet test "$(Build.SourcesDirectory)/Kros.KORM.Extensions.Asp.sln" --configuration Release --logger trx --results-directory "$(Common.TestResultsDirectory)"
+    displayName: Test
+
+  - task: PublishTestResults@2
+    displayName: Publish test results
+    condition: succeededOrFailed()
     inputs:
-      command: build
-      projects: '**/*.csproj'
-      arguments: '--configuration $(BuildConfiguration)'
+      testResultsFormat: VSTest
+      testResultsFiles: '*.trx'
+      searchFolder: $(Common.TestResultsDirectory)
 
-  - template: steps/dotnet-test-and-publish-results.yml@templates
+  - ${{ if ne(variables['Build.Reason'], 'PullRequest') }}:
+    - task: CopyFiles@2
+      displayName: Copy packages to staging folder
+      inputs:
+        contents: |
+          **/*.nupkg
+          **/*.snupkg
+        targetFolder: $(Build.ArtifactStagingDirectory)
+        flattenFolders: true
 
-  - task: CopyFiles@2
-    displayName: 'Copy package files to staging directory'
-    inputs:
-      Contents: |
-        **/*.nupkg
-        **/*.snupkg
-      TargetFolder: '$(build.artifactStagingDirectory)'
-      FlattenFolders: true
-
-  - template: steps/nuget-push.yml@templates
-    parameters:
-      feed: $(nuget.feed)
+    - pwsh: |
+        $nupkgFiles = Get-ChildItem -Path "$(Build.ArtifactStagingDirectory)" -Filter "*.nupkg"
+        Write-Host "Found $($nupkgFiles.Count) .nupkg file(s) to push"
+        $nupkgFiles | ForEach-Object {
+          Write-Host "Pushing $($_.FullName)"
+          & dotnet nuget push "$($_.FullName)" --source https://api.nuget.org/v3/index.json --api-key $(nugetOrgApiKey) --skip-duplicate
+          Write-Host
+        }
+      displayName: Push packages to server
