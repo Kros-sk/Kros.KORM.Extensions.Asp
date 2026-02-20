@@ -1,5 +1,4 @@
-﻿using FluentAssertions;
-using Kros.KORM.Extensions.Asp;
+﻿using Kros.KORM.Extensions.Asp;
 using Kros.KORM.Metadata;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,9 +19,8 @@ namespace Kros.KORM.Extensions.Api.UnitTests
 
             services.AddKorm("server=localhost");
 
-            services.BuildServiceProvider()
-                .GetService<IDatabase>()
-                .Should().NotBeNull();
+            Assert.NotNull(services.BuildServiceProvider()
+                .GetService<IDatabase>());
         }
 
         [Fact]
@@ -33,7 +31,7 @@ namespace Kros.KORM.Extensions.Api.UnitTests
 
             KormBuilder builder = services.AddKorm(configuration);
 
-            builder.ConnectionSettings.ConnectionString.Should().Be(configuration.GetConnectionString("DefaultConnection"));
+            Assert.Equal(configuration.GetConnectionString("DefaultConnection"), builder.ConnectionSettings.ConnectionString);
         }
 
         [Fact]
@@ -48,7 +46,8 @@ namespace Kros.KORM.Extensions.Api.UnitTests
 
                 services.AddKorm(configuration, cnstrName);
             };
-            action.Should().Throw<ArgumentException>().WithMessage($"*{cnstrName}*");
+            var exception = Assert.Throws<ArgumentException>(action);
+            Assert.Contains(cnstrName, exception.Message);
         }
 
         [Fact]
@@ -61,7 +60,8 @@ namespace Kros.KORM.Extensions.Api.UnitTests
 
                 services.AddKorm(configuration);
             };
-            action.Should().Throw<ArgumentException>().WithMessage($"*{KormBuilder.DefaultConnectionStringName}*");
+            var exception = Assert.Throws<ArgumentException>(action);
+            Assert.Contains(KormBuilder.DefaultConnectionStringName, exception.Message);
         }
 
         [Fact]
@@ -100,8 +100,9 @@ namespace Kros.KORM.Extensions.Api.UnitTests
                 factory3 = scope.ServiceProvider.GetService<IDatabaseFactory>();
             }
 
-            factory2.Should().Be(factory1, "\"factory2\" was created in the same scope as \"factory1\".");
-            factory3.Should().NotBeNull().And.NotBe(factory1, "\"factory3\" was created in different scope as \"factory1\".");
+            Assert.Same(factory1, factory2);
+            Assert.NotNull(factory3);
+            Assert.NotSame(factory1, factory3);
         }
 
         [Fact]
@@ -124,8 +125,9 @@ namespace Kros.KORM.Extensions.Api.UnitTests
                 db3 = factory2.GetDatabase("db1");
             }
 
-            db2.Should().Be(db1, "\"db2\" was created using the same factory as \"db1\".");
-            db3.Should().NotBeNull().And.NotBe(db1, "\"db3\" was created using factory in different scope as \"db1\".");
+            Assert.Same(db1, db2);
+            Assert.NotNull(db3);
+            Assert.NotSame(db1, db3);
         }
 
         [Fact]
@@ -153,7 +155,8 @@ namespace Kros.KORM.Extensions.Api.UnitTests
 
             Action action = () => services.AddKorm("server=localhost-2", "db1");
 
-            action.Should().Throw<ArgumentException>().And.ParamName.Should().Be("name");
+            var exception = Assert.Throws<ArgumentException>(action);
+            Assert.Equal("name", exception.ParamName);
         }
 
         [Fact]
@@ -167,7 +170,8 @@ namespace Kros.KORM.Extensions.Api.UnitTests
 
             Action action = () => factory.GetDatabase("NonExistingName");
 
-            action.Should().Throw<ArgumentException>().And.ParamName.Should().Be("name");
+            var exception = Assert.Throws<ArgumentException>(action);
+            Assert.Equal("name", exception.ParamName);
         }
 
         [Fact]
@@ -184,7 +188,7 @@ namespace Kros.KORM.Extensions.Api.UnitTests
 
             Action action = () => factory.GetDatabase("db1");
 
-            action.Should().Throw<ObjectDisposedException>();
+            Assert.Throws<ObjectDisposedException>(action);
         }
     }
 }

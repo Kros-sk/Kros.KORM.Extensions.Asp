@@ -1,5 +1,4 @@
-﻿using FluentAssertions;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Xunit;
 
 namespace Kros.KORM.Extensions.Api.UnitTests
@@ -28,14 +27,14 @@ namespace Kros.KORM.Extensions.Api.UnitTests
 
             KormConnectionSettings actual = configuration.GetKormConnectionString(name);
 
-            actual.Should().BeEquivalentTo(expected);
+            Assert.Equivalent(expected, actual, strict: true);
         }
 
         [Fact]
         public void ReturnNullIfNameIsNotInEitherSection()
         {
             IConfigurationRoot configuration = ConfigurationHelper.GetConfiguration();
-            configuration.GetKormConnectionString("ThisNameDoesNotExist").Should().BeNull();
+            Assert.Null(configuration.GetKormConnectionString("ThisNameDoesNotExist"));
         }
     }
 }

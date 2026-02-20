@@ -1,5 +1,4 @@
-﻿using FluentAssertions;
-using Kros.Data;
+﻿using Kros.Data;
 using Kros.KORM.Extensions.Asp;
 using Kros.UnitTests;
 using Microsoft.Data.SqlClient;
@@ -41,16 +40,16 @@ namespace Kros.KORM.Extensions.Api.UnitTests
             using (SqlCommand cmd = ServerHelper.Connection.CreateCommand())
             {
                 cmd.CommandText = "SELECT Count(*) FROM sys.tables WHERE name = 'IdStore' AND type = 'U'";
-                ((int)cmd.ExecuteScalar()).Should().Be(1);
+                Assert.Equal(1, (int)cmd.ExecuteScalar());
 
                 cmd.CommandText = "SELECT Count(*) FROM sys.procedures WHERE name = 'spGetNewId' AND type = 'P'";
-                ((int)cmd.ExecuteScalar()).Should().Be(1);
+                Assert.Equal(1, (int)cmd.ExecuteScalar());
 
                 cmd.CommandText = "SELECT Count(*) FROM sys.tables WHERE name = 'IdStoreInt64' AND type = 'U'";
-                ((int)cmd.ExecuteScalar()).Should().Be(1);
+                Assert.Equal(1, (int)cmd.ExecuteScalar());
 
                 cmd.CommandText = "SELECT Count(*) FROM sys.procedures WHERE name = 'spGetNewIdInt64' AND type = 'P'";
-                ((int)cmd.ExecuteScalar()).Should().Be(1);
+                Assert.Equal(1, (int)cmd.ExecuteScalar());
             }
         }
     }
