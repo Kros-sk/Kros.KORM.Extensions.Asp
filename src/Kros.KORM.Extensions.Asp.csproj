@@ -34,13 +34,15 @@
     <PackageProjectUrl>https://github.com/Kros-sk/Kros.KORM.Extensions.Asp</PackageProjectUrl>
     <PackageTags>Kros;KORM;ASP.NET Core;Kros.KORM</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageIcon>icon.png</PackageIcon>
+    <PackageIcon>logo.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/Kros-sk/Kros.KORM.Extensions.Asp</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="Resources\icon.png" Pack="true" PackagePath="" />
+    <None Include="../README.md" Pack="true" PackagePath="/" />
+    <None Include="../logo.png" Pack="true" PackagePath="/" />
   </ItemGroup>
 
   <ItemGroup>
