@@ -2,46 +2,57 @@ trigger:
   batch: true
   branches:
     include:
-      - master
+      - main
 
-pool: Default
+pool:
+  vmImage: ubuntu-latest
 
 variables:
   - group: Nuget
 
 steps:
   - pwsh: |
-      dotnet build "$(Build.SourcesDirectory)/Kros.KORM.Extensions.Asp.sln" --configuration Release
-    displayName: Build
+      Get-ChildItem -Path '$(Build.ArtifactStagingDirectory)' -Recurse -Include *.nupkg, *.snupkg | Remove-Item
+      Get-ChildItem -Path '$(Build.SourcesDirectory)' -Recurse -Include *.nupkg, *.snupkg | Remove-Item
+    displayName: Clear NuGet packages
 
-  - pwsh: |
-      dotnet test "$(Build.SourcesDirectory)/Kros.KORM.Extensions.Asp.sln" --configuration Release --logger trx --results-directory "$(Common.TestResultsDirectory)"
+  - task: DotNetCoreCLI@2
+    displayName: Build
+    inputs:
+      command: build
+      projects: Kros.KORM.Extensions.Asp.slnx
+      arguments: --configuration Release
+
+  - task: DotNetCoreCLI@2
     displayName: Test
+    inputs:
+      command: test
+      projects: Kros.KORM.Extensions.Asp.slnx
+      publishTestResults: false
+      arguments: --configuration Release --logger trx --results-directory "$(Common.TestResultsDirectory)"
 
   - task: PublishTestResults@2
     displayName: Publish test results
-    condition: succeededOrFailed()
+    condition: always()
     inputs:
       testResultsFormat: VSTest
       testResultsFiles: '*.trx'
       searchFolder: $(Common.TestResultsDirectory)
 
-  - ${{ if ne(variables['Build.Reason'], 'PullRequest') }}:
+  - ${{ if in(variables['Build.SourceBranchName'], 'main', 'net48') }}:
+
     - task: CopyFiles@2
-      displayName: Copy packages to staging folder
+      displayName: Copy package files to staging directory
       inputs:
-        contents: |
+        Contents: |
           **/*.nupkg
           **/*.snupkg
-        targetFolder: $(Build.ArtifactStagingDirectory)
-        flattenFolders: true
+        TargetFolder: $(Build.ArtifactStagingDirectory)
+        FlattenFolders: true
 
     - pwsh: |
-        $nupkgFiles = Get-ChildItem -Path "$(Build.ArtifactStagingDirectory)" -Filter "*.nupkg"
-        Write-Host "Found $($nupkgFiles.Count) .nupkg file(s) to push"
-        $nupkgFiles | ForEach-Object {
-          Write-Host "Pushing $($_.FullName)"
-          & dotnet nuget push "$($_.FullName)" --source https://api.nuget.org/v3/index.json --api-key $(nugetOrgApiKey) --skip-duplicate
-          Write-Host
+        Get-ChildItem '$(Build.ArtifactStagingDirectory)/*.nupkg' | ForEach-Object {
+          Write-Host 'Pushing package $($_.Name)'
+          dotnet nuget push --api-key $(nugetOrgApiKey) --source 'https://api.nuget.org/v3/index.json'  --skip-duplicate $_.FullName
         }
-      displayName: Push packages to server
+      displayName: Push to NuGet.org
